@@ -1,0 +1,19 @@
+{
+  "name": "reel-of-the-gods",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A first-person 3D fishing game across 100 islands.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "vite": "5.4.21",
+    "vite-plugin-singlefile": "2.3.0"
+  }
+}
