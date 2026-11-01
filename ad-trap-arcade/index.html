@@ -785,43 +785,43 @@ function renderHome(){
   const f=pick(GAMES.filter(g=>!g.noAds));
   const home=$('#home');
   home.innerHTML=`
-  <div class="h-head"><div class="logo">AdTrap Arcade</div><div class="tag">13 games · 12 exactly like the ads* · 1 actually real</div></div>
-  <div class="stats"><div><b id="s-ads">${ST.ads}</b><span>ads watched</span></div><div><b id="s-at">${fmtT(ST.adTime)}</b><span>in ads</span></div><div><b id="s-pt">${fmtT(ST.playTime)}</b><span>actually playing</span></div></div>
-  <button class="feat" style="--g1:${f.g[0]};--g2:${f.g[1]}"><canvas></canvas><div class="fx"><span class="ftag">⭐ EDITOR'S CHOICE · Ad</span><div class="fname">${f.name}</div><div class="fhook">${f.hook}</div><span class="fplay">▶ PLAY FREE</span></div></button>
+  <div class="h-head"><div class="logo">AdTrap Arcade</div><div class="tag">13 games · 0 ads · just play</div></div>
+  <div class="stats"><div><b>13</b><span>games</span></div><div><b>0</b><span>ads</span></div><div><b id="s-pt">${fmtT(ST.playTime)}</b><span>time played</span></div></div>
+  <button class="feat" style="--g1:${f.g[0]};--g2:${f.g[1]}"><canvas></canvas><div class="fx"><span class="ftag">⭐ EDITOR'S CHOICE</span><div class="fname">${f.name}</div><div class="fhook">${f.hook}</div><span class="fplay">▶ PLAY FREE</span></div></button>
   <div class="sec">🔥 Top Free Games <small>pick your poison</small></div>
   <div class="grid">${GAMES.map((g,i)=>[g,i]).sort((a,b)=>(b[0].noAds?1:0)-(a[0].noAds?1:0)).map(([g,i])=>`<button class="card${g.noAds?' wide':''}" data-i="${i}" style="--g1:${g.g[0]};--g2:${g.g[1]};--d:${(i*.37)%2}s">
       <canvas class="cthumb"></canvas>
-      <span class="cbadge ${g.noAds?'ok':i%3===0?'ad':''}">${g.noAds?'✅ NO ADS · REAL GAME':i%3===0?'Ad':i%3===1?'#'+(i+1)+' '+g.cat:'🔥 HOT'}</span>
+      <span class="cbadge ${g.noAds?'ok':''}">${g.noAds?'🌱 NEW · ORIGINAL':i%2?'#'+(i+1)+' '+g.cat:'🔥 HOT'}</span>
       <div class="cbody"><span class="cicon">${g.icon}</span><div class="ctext"><div class="cname">${g.name}</div><div class="cmeta">★ ${g.rating} · ${g.dl}</div></div></div></button>`).join('')}</div>
-  <div class="foot">*Gameplay footage may not represent actual gameplay.<br>Or any gameplay. Ever.<br>You have been redirected by ads ${ST.hijacks} time${ST.hijacks===1?'':'s'}.</div>`;
+  <div class="foot">No ads. No popups. Just games. 🎮</div>`;
   mountAd($('.feat canvas',home),f);
   $('.feat',home).onclick=()=>openStore(f);
   home.querySelectorAll('.card').forEach(c=>{const g=GAMES[+c.dataset.i];mountAd($('canvas',c),g,R(+c.dataset.i)*g.len,{fit:'cover',fps:24,dpr:1.5,observe:true});c.onclick=()=>openStore(g);});
   show('home');home.scrollTop=0;
 }
-setInterval(()=>{const a=$('#s-ads');if(a&&$('#home').classList.contains('on')){a.textContent=ST.ads;$('#s-at').textContent=fmtT(ST.adTime);$('#s-pt').textContent=fmtT(ST.playTime);}},1000);
+setInterval(()=>{const a=$('#s-pt');if(a&&$('#home').classList.contains('on'))a.textContent=fmtT(ST.playTime);},1000);
 
 /* =====================================================================
    STORE PAGE
    ===================================================================== */
 function openStore(g){
   const reviews=g.reviews||[
-    ['xX_N00bSlayer_Xx',5,'EXACTLY like the ads!!! 10/10 would watch 400 ads again'],
+    ['xX_N00bSlayer_Xx',5,'No ads at all?? Finally a game I can just play 🙌'],
     ['definitely_not_a_bot_8812',5,'Great game. Great game. Great game. Great game.'],
     ['Grandma Pat',5,`I don't know what any of this is but the colors are nice`],
     ['Brenda K.',1,`Where is the ${g.thing} part?? I have been tapping the same thing for 3 hours`],
-    ['real_gamer_99',1,'Watched an ad to watch an ad to skip an ad. I am in hell.'],
+    ['real_gamer_99',1,'Too addictive. Missed my bus.'],
   ];
   const st=$('#store');
   st.innerHTML=`<div class="topbar"><button class="back">‹</button><span class="t">Game Store</span></div>
   <div class="st-scroll">
-   <div class="st-media"><canvas></canvas><span class="badge l">▶ ${g.noAds?"REAL GAMEPLAY":"GAMEPLAY*"}</span><span class="badge r" ${g.noAds?'style="background:#2f9e44;color:#fff"':""}>${g.noAds?"✅ No ads":"Ad"}</span><span class="badge b">${g.noAds?"This is actual gameplay. We checked twice.":"*Not actual gameplay. Footage is for illustrative purposes."}</span></div>
+   <div class="st-media"><canvas></canvas><span class="badge l">▶ ${g.noAds?"REAL GAMEPLAY":"PREVIEW"}</span><span class="badge r" style="background:#2f9e44;color:#fff">✅ No ads</span></div>
    <div class="st-info" style="--g1:${g.g[0]};--g2:${g.g[1]}"><div class="st-ico">${g.icon}</div><div><div class="st-name">${g.name}</div><div class="st-dev">Totally Real Games Ltd. · ${g.cat}</div></div></div>
-   <div class="st-row"><div>★ ${g.rating}<small>12M reviews</small></div><div>${g.dl}<small>downloads</small></div><div>3+<small>ads 18+</small></div><div>📺 ${g.noAds?"0%":"99%"}<small>ad content</small></div></div>
+   <div class="st-row"><div>★ ${g.rating}<small>12M reviews</small></div><div>${g.dl}<small>downloads</small></div><div>3+<small>everyone</small></div><div>🚫 0<small>ads</small></div></div>
    <button class="install pulse"><i class="bar"></i><span>INSTALL · FREE</span></button>
    <div class="rev-h">Ratings & reviews</div>
    ${reviews.filter(r=>r[1]===5).map(r=>`<div class="rev"><div class="who">${r[0]}<span>${'★'.repeat(r[1])}</span></div><p>${r[2]}</p></div>`).join('')}
-   <div class="rev hidden">${g.noAds?"1 one-star review, from the pop-ups":"2,384,112 one-star reviews hidden by the developer 🙈"} <u class="show1">show</u></div>
+   <div class="rev hidden">${g.noAds?"1 one-star review, from the pop-ups":"A few one-star reviews"} <u class="show1">show</u></div>
    <div class="foot">Contains ads · In-app purchases · Gameplay may vary from video</div>
   </div>`;
   mountAd($('.st-media canvas',st),g);
@@ -861,6 +861,7 @@ function popup({title,html='',buttons=[],closeAfter=null,cls='',onMount=null}){
 
 function pickAdGame(ex){const pool=GAMES.filter(g=>g!==ex);return pick(pool);}
 async function showAd(ex){
+  if(ADS_OFF)return 'ok';
   const n=Math.random()<.4?2:1;
   for(let i=0;i<n;i++){const r=await oneAd(pickAdGame(ex),i,n);if(r!=='ok')return r;}
   return 'ok';
@@ -978,7 +979,7 @@ function TapperGame(W,H,th,lv){
       for(const p of parts){const q=p.t/.7;circ(p.x+p.vx*q,p.y+p.vy*q+q*q*120,5*(1-q),p.c);}
       for(const f of fl){const q=f.t/.8;X.save();X.globalAlpha=1-q;tx('+'+f.v,f.x,f.y-q*90,30,'#ffe066','#3a1500');X.restore();}
       if(t<3)tx('TAP TAP TAP!',W/2,92,20,'#fff','#1a1033');
-      const k=mult>1?1:1+Math.sin(t*6)*.04;X.save();X.translate(W/2,B.y+B.h/2);X.scale(k,k);panel(-B.w/2,-B.h/2,B.w,B.h,24,mult>1?'#2f9e44':'#f59f00',{depth:6});tx(mult>1?`⚡ x2 ACTIVE ${Math.ceil(multT)}s`:'🎬 x2 POWER (watch ad)',0,1,19,'#fff','rgba(0,0,0,.4)',B.w-24);X.restore();},
+      const k=mult>1?1:1+Math.sin(t*6)*.04;X.save();X.translate(W/2,B.y+B.h/2);X.scale(k,k);panel(-B.w/2,-B.h/2,B.w,B.h,24,mult>1?'#2f9e44':'#f59f00',{depth:6});tx(mult>1?`⚡ x2 ACTIVE ${Math.ceil(multT)}s`:(ADS_OFF?'⚡ x2 POWER (free!)':'🎬 x2 POWER (watch ad)'),0,1,19,'#fff','rgba(0,0,0,.4)',B.w-24);X.restore();},
     tap(x,y){if(x>B.x&&x<B.x+B.w&&y>B.y&&y<B.y+B.h){if(mult===1)this.wantBoost=true;return;}taps+=mult;sc=1.22;fl.push({x:x+rand(-20,20),y,v:mult,t:0});
       for(let i=0;i<8;i++){const a=Math.random()*Math.PI*2;parts.push({x,y,vx:Math.cos(a)*rand(40,110),vy:Math.sin(a)*rand(40,110)-60,c:pick(['#ffd43b','#ff8787','#74c0fc','#8ce99a']),t:0});}
       if(taps>=target)this.status='win';},
@@ -1143,13 +1144,15 @@ const REAL={match:MatchGame,runner:RunnerGame,tapper:TapperGame,stacker:StackGam
    SESSION (playing an installed game)
    ===================================================================== */
 let S=null;
+const ADS_OFF=true; // no ads anywhere during play
+const adFree=g=>ADS_OFF||!!g.noAds;
 const dead=s=>!s||s.dead||S!==s;
 function startGame(g){
   closeAll();if(S)S.dead=true;
   const s=S={g,dead:false,level:1,energy:5,gems:0,phase:'loading',real:null,W:0,H:0,nextInt:rand(6,9),adT:0,playT:0,bannerIv:null};
   const el=$('#game');
   el.style.setProperty('--g1',g.g[0]);el.style.setProperty('--g2',g.g[1]);
-  if(g.noAds){el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip" style="margin-left:auto;background:linear-gradient(#51cf66,#2b8a3e)">✅ NO ADS (REALLY)</span></div><div class="ratio"><div class="ad"></div><div class="lbl"><span>📺 Ads 0%</span><span>🎮 Game 100%</span></div></div><div class="stage"><canvas></canvas></div>`;}
+  if(adFree(g)){el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip" style="margin-left:auto;background:linear-gradient(#51cf66,#2b8a3e)">✅ NO ADS</span></div><div class="stage"><canvas></canvas></div>`;}
   else el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip en">⚡ 5/5</span><span class="chip gm">💎 0</span><button class="chip noads">🚫 NO ADS</button></div>
    <div class="ratio"><div class="ad"></div><div class="lbl"><span>📺 Ads 0%</span><span>🎮 Game 0%</span></div></div>
    <div class="stage"><canvas></canvas><button class="gift">🎁</button>
@@ -1157,11 +1160,11 @@ function startGame(g){
    <div class="bannerad"></div>`;
   show('game');
   $('.home',el).onclick=()=>leaveFlow(s);
-  if(!g.noAds){$('.noads',el).onclick=()=>noAdsFlow(s);$('.gift',el).onclick=()=>{if(s.phase!=='play'||OV.busy())return;s.phase='int';toast('🎁 Your free gift is… an ad!');showAd(g).then(r=>{if(dead(s)||r!=='ok')return;s.gems+=1;hud(s);toast('🎁 +1 💎');s.phase='play';});};}
+  if(!adFree(g)){$('.noads',el).onclick=()=>noAdsFlow(s);$('.gift',el).onclick=()=>{if(s.phase!=='play'||OV.busy())return;s.phase='int';toast('🎁 Your free gift is… an ad!');showAd(g).then(r=>{if(dead(s)||r!=='ok')return;s.gems+=1;hud(s);toast('🎁 +1 💎');s.phase='play';});};}
   const cv=$('.stage canvas',el);
   cv.onpointerdown=e=>{if(!s.real||s.phase!=='play'||OV.busy())return;const r=cv.getBoundingClientRect();const sc=Math.min(r.width/s.W,r.height/s.H);const ox=(r.width-s.W*sc)/2,oy=(r.height-s.H*sc)/2;s.real.tap((e.clientX-r.left-ox)/sc,(e.clientY-r.top-oy)/sc);cv._sx=e.clientX;cv._sy=e.clientY;};
   cv.onpointerup=e=>{if(!s.real||!s.real.swipe||s.phase!=='play'||OV.busy()||cv._sx==null)return;const dx=e.clientX-cv._sx,dy=e.clientY-cv._sy;cv._sx=null;if(Math.hypot(dx,dy)>24)s.real.swipe(dx,dy);};
-  if(g.noAds){startLevel(s);toast('✅ No ads in this one. Enjoy!',2500);return;}
+  if(adFree(g)){startLevel(s);toast('✅ No ads. Just play!',2200);return;}
   rotateBanner(s);s.bannerIv=setInterval(()=>{if(dead(s)){clearInterval(s.bannerIv);return;}rotateBanner(s);},4500);
   splash(s);
 }
@@ -1170,7 +1173,7 @@ function rotateBanner(s){const b=$('#game .bannerad');if(!b)return;const g=pickA
   b.innerHTML=`<span class="btag">Ad</span><div class="bi">${g.icon}</div><div class="bt"><b>${g.name}</b><small>${g.hook}</small></div><div class="bb">INSTALL</div>`;
   b.classList.remove('swap');void b.offsetWidth;b.classList.add('swap');
   b.onclick=()=>{if(dead(s))return;toast('Oops — you tapped a banner 🙃');ST.ads++;hijack(g);};}
-function hud(s){const el=$('#game');if(!el||dead(s))return;if(s.g.noAds){$('.lv',el).textContent='Lv '+s.level;return;}$('.lv',el).textContent='Lv '+s.level;$('.en',el).textContent=`⚡ ${s.energy}/5`;$('.gm',el).textContent='💎 '+s.gems;}
+function hud(s){const el=$('#game');if(!el||dead(s))return;if(adFree(s.g)){$('.lv',el).textContent='Lv '+s.level;return;}$('.lv',el).textContent='Lv '+s.level;$('.en',el).textContent=`⚡ ${s.energy}/5`;$('.gm',el).textContent='💎 '+s.gems;}
 function updRatio(s){const el=$('#game .ratio');if(!el)return;const tot=s.adT+s.playT||1;const a=Math.round(100*s.adT/tot);$('.ad',el).style.width=a+'%';const sp=el.querySelectorAll('.lbl span');sp[0].textContent=`📺 Ads ${a}%`;sp[1].textContent=`🎮 Game ${100-a}%`;}
 function hijack(g){closeAll();if(S){S.dead=true;clearInterval(S.bannerIv);S=null;}ST.hijacks++;openStore(g);setTimeout(()=>toast('📲 You got redirected to the store. Classic.'),200);}
 function endSession(){if(S){S.dead=true;clearInterval(S.bannerIv);S=null;}closeAll();}
@@ -1196,14 +1199,14 @@ function startLevel(s){
   const st=$('#game .stage');const r=st.getBoundingClientRect();s.W=r.width;s.H=r.height;
   s.real=REAL[s.g.real](s.W,s.H,s.g.theme,s.level,s);s.real.onGem=()=>{s.gems++;hud(s);};
   hud(s);s.phase='intro';
-  const b=h(`<div class="lvl"><b>LEVEL ${s.level}</b><span>${s.g.noAds?'No ads. Just maze.':s.level===1?'Tutorial':pick(['Super Hard 💀','Boss Level 👹','Easy 😌','Like in the ad!*'])}</span></div>`);st.appendChild(b);
+  const b=h(`<div class="lvl"><b>LEVEL ${s.level}</b><span>${adFree(s.g)?(s.g.real==='maze'?'Clear every coin!':'Good luck!'):s.level===1?'Tutorial':pick(['Super Hard 💀','Boss Level 👹','Easy 😌','Like in the ad!*'])}</span></div>`);st.appendChild(b);
   setTimeout(()=>{b.remove();if(!dead(s)&&s.phase==='intro'){s.phase='play';s.nextInt=rand(5,8);}},1300);
 }
 function confettiDom(){const st=$('#game .stage');if(!st)return;const c=h('<div class="confetti"></div>');for(let i=0;i<50;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=`hsl(${Math.random()*360},90%,60%)`;p.style.animationDelay=Math.random()*.6+'s';p.style.animationDuration=rand(1.2,2.2)+'s';c.appendChild(p);}st.appendChild(c);setTimeout(()=>c.remove(),3000);}
 
 async function levelWin(s){
   s.phase='done';confettiDom();
-  if(s.g.noAds){await popup({cls:'green',title:'MAZE CLEARED! 🎉',html:`<div class="big">🌱</div>Score: <b>${s.maze.score}</b><br><small style="opacity:.7">No ads were harmed in the making of this level.</small>`,buttons:[{label:'NEXT LEVEL ▶',cls:'green pulse',value:1}]});if(dead(s))return;s.level++;startLevel(s);return;}
+  if(adFree(s.g)){const mz=s.real&&s.g.real==='maze';await popup({cls:'green',title:mz?'MAZE CLEARED! 🎉':'LEVEL COMPLETE! 🎉',html:mz?`<div class="big">🌱</div>Score: <b>${s.maze.score}</b>`:`<div class="big">⭐⭐⭐</div>Nice one!`,buttons:[{label:'NEXT LEVEL ▶',cls:'green pulse',value:1}]});if(dead(s))return;s.level++;startLevel(s);return;}
   const r=await popup({cls:'green',title:'LEVEL COMPLETE! 🎉',html:`<div class="big">⭐⭐⭐</div>Reward: <b>+10 💎</b>`,buttons:[{label:'🎬 CLAIM x3',cls:'gold pulse',value:'x3'},{label:'No thanks',cls:'link',value:'no',delay:2500}]});
   if(dead(s))return;
   if(r==='no'){const r2=await popup({cls:'red',title:'Are you sure? 🥺',html:'You will lose <b>20 💎</b> FOREVER.<br>Think of the gems.',buttons:[{label:'🎬 Watch ad',cls:'green',value:'ad'},{label:"I'm sure",cls:'link',value:'sure',delay:1500}]});if(dead(s))return;if(r2==='sure')toast('Okay! Here is an ad anyway 🙂');}
@@ -1217,11 +1220,14 @@ async function levelWin(s){
 }
 async function levelFail(s){
   s.phase='done';
-  if(s.g.noAds){const sc=s.maze.score;const best=ST.mazeBest=Math.max(ST.mazeBest||0,sc);
-    const r=await popup({cls:'red',title:'GAME OVER',html:`<div class="big">🫠</div>Score: <b>${sc}</b><br>Best: <b>${best}</b>`,buttons:[{label:'PLAY AGAIN',cls:'green pulse',value:'again'},{label:'🎬 Watch an ad to continue (optional!)',cls:'link',value:'ad'},{label:'🏠 Home',cls:'link',value:'home'}]});
+  if(adFree(s.g)&&s.g.real!=='maze'){
+    const r=await popup({cls:'red',title:s.g.real==='runner'?'YOU CRASHED 💥':'TOWER FELL 💥',html:'<div class="big">😵</div>So close!',buttons:[{label:'▶ CONTINUE',cls:'green pulse',value:'rev'},{label:'↻ Restart level',cls:'link',value:'restart'},{label:'🏠 Home',cls:'link',value:'home'}]});
+    if(dead(s))return;if(r==='home'){endSession();renderHome();return;}
+    if(r==='rev'){s.real.revive();s.phase='play';}else startLevel(s);return;}
+  if(adFree(s.g)){const sc=s.maze.score;const best=ST.mazeBest=Math.max(ST.mazeBest||0,sc);
+    const r=await popup({cls:'red',title:'GAME OVER',html:`<div class="big">🫠</div>Score: <b>${sc}</b><br>Best: <b>${best}</b>`,buttons:[{label:'PLAY AGAIN',cls:'green pulse',value:'again'},{label:'🏠 Home',cls:'link',value:'home'}]});
     if(dead(s))return;
     if(r==='home'){endSession();renderHome();return;}
-    if(r==='ad'){toast('You asked for this 🙃');if(await adBlock(s))return;s.maze.lives=1;s.real.revive();s.phase='play';return;}
     s.maze={score:0,lives:3};s.level=1;startLevel(s);return;}
   const r=await popup({cls:'red',title:s.g.real==='runner'?'YOU CRASHED 💥':'TOWER FELL 💥',html:'<div class="big">😵</div>So close! Continue?',buttons:[{label:'🎬 REVIVE',cls:'green pulse',value:'rev'},{label:'Give up',cls:'link',value:'no',delay:2000}]});
   if(dead(s))return;
@@ -1230,7 +1236,7 @@ async function levelFail(s){
   if(r==='rev'){s.real.revive();s.phase='play';s.nextInt=rand(6,9);}else startLevel(s);
 }
 async function boostFlow(s){
-  s.phase='int';if(await adBlock(s))return;s.real.boost();toast('⚡ x2 POWER for 8 seconds!');s.phase='play';
+  s.phase='int';if(!ADS_OFF&&await adBlock(s))return;s.real.boost();toast('⚡ x2 POWER for 8 seconds!');s.phase='play';
 }
 async function dailyReward(s){
   const r=await popup({title:'📅 DAILY REWARD',html:`<div class="days"><div class="today">Day 1<b>💎</b>1</div><div>Day 2<b>💎</b>2</div><div>Day 3<b>💎</b>3</div><div>Day 4<b>💎</b>4</div><div>Day 5<b>💎</b>5</div><div>Day 6<b>💎</b>6</div><div class="wide">Day 3650<b>👑</b>VIP</div></div>`,
@@ -1281,7 +1287,7 @@ async function interrupt(s){
   s.phase='play';s.nextInt=rand(7,11);
 }
 async function leaveFlow(s){
-  if(s.g&&s.g.noAds&&!OV.busy()){endSession();renderHome();return;}
+  if(s.g&&adFree(s.g)&&!OV.busy()){endSession();renderHome();return;}
   if(dead(s)||OV.busy()||s.phase==='loading')return;
   const prev=s.phase;s.phase='int';
   const r=await popup({title:'Leaving so soon? 😢',html:'Watch one last ad as a goodbye?',buttons:[{label:'📺 Sure!',cls:'green',value:'y'},{label:'Leave',cls:'link',value:'n',delay:1500}],closeAfter:1500});
@@ -1317,7 +1323,7 @@ function frame(now){
       if(s.real.status==='win')levelWin(s);
       else if(s.real.status==='fail')levelFail(s);
       else if(s.real.wantBoost){s.real.wantBoost=false;boostFlow(s);}
-      else if(s.nextInt<=0&&!s.g.noAds)interrupt(s);
+      else if(s.nextInt<=0&&!adFree(s.g))interrupt(s);
     }
     const cv=$('#game .stage canvas');
     if(cv){const dpr=Math.min(2,devicePixelRatio||1),cw=cv.clientWidth,ch=cv.clientHeight;if(cw&&ch){const w=Math.round(cw*dpr),hh=Math.round(ch*dpr);if(cv.width!==w||cv.height!==hh){cv.width=w;cv.height=hh;}
