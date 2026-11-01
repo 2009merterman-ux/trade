@@ -74,6 +74,9 @@ button{font-family:inherit;font-weight:inherit;cursor:pointer}
 .cmeta{font-size:11px;opacity:.9;margin-top:3px;font-weight:700}
 .cbadge{position:absolute;top:8px;right:8px;font-size:10px;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:99px;z-index:2}
 .cbadge.ad{background:#ffd43b;color:#222}
+.cbadge.ok{background:#2f9e44;color:#fff}
+.card.wide{grid-column:span 2}
+.card.wide .cthumb{height:180px}
 .foot{text-align:center;font-size:11px;opacity:.45;padding:22px 20px 40px;font-weight:700;line-height:1.5}
 
 /* ---------- STORE ---------- */
@@ -747,7 +750,9 @@ const GAMES=[
   {id:'dig',name:'Gold Digger 3D',icon:'⛏️',g:['#fbc531','#e1701a'],cat:'Puzzle',rating:4.8,dl:'100M+',hook:'Dig the perfect path! 🤑',thing:'sand digging',real:'stacker',theme:['💰'],len:9,draw:adDig,fx:{hits:[],end:6.9},thumb:.6},
   {id:'doors',name:'Door IQ Test',icon:'🚪',g:['#ff6b6b','#862e2e'],cat:'Brain',rating:4.9,dl:'1B+',hook:'99% of people pick the wrong door',thing:'door choosing',real:'match',theme:['🚪','🔑','🧠','❓'],len:7,draw:adDoors,fx:{hits:[2.7,3.4],end:4},thumb:.5},
 ];
-const REALNAME={match:'Match Party',runner:'Endless Lane',tapper:'Tap Tycoon',stacker:'Stack Tower'};
+GAMES.push({id:'maze',name:'Maze Muncher',icon:'🌱',g:['#7950f2','#1c1452'],cat:'Arcade',rating:'5.0',dl:'1',hook:'An actual game. No ads. We swear.',thing:'ad',real:'maze',noAds:true,theme:[],len:600,draw:(t)=>adMaze(t),fx:{hits:[],end:0},thumb:.45,
+  reviews:[['suspicious_user',5,'I kept waiting for an ad. It never came. I am scared.'],['ad_survivor_2026',5,'Played for 10 minutes and nothing tried to sell me gems. Is this legal?'],['the_pop_ups',1,'We are being hunted in this game. Disgusting.']]});
+const REALNAME={match:'Match Party',runner:'Endless Lane',tapper:'Tap Tycoon',stacker:'Stack Tower',maze:'Real Game'};
 
 /* ---------------- stats ---------------- */
 const ST=(()=>{try{return Object.assign({ads:0,adTime:0,playTime:0,hijacks:0},JSON.parse(localStorage.getItem('adtrap')||'{}'));}catch(e){return{ads:0,adTime:0,playTime:0,hijacks:0};}})();
@@ -777,16 +782,16 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.to
    HOME
    ===================================================================== */
 function renderHome(){
-  const f=pick(GAMES);
+  const f=pick(GAMES.filter(g=>!g.noAds));
   const home=$('#home');
   home.innerHTML=`
-  <div class="h-head"><div class="logo">AdTrap Arcade</div><div class="tag">12 games · exactly like the ads*</div></div>
+  <div class="h-head"><div class="logo">AdTrap Arcade</div><div class="tag">13 games · 12 exactly like the ads* · 1 actually real</div></div>
   <div class="stats"><div><b id="s-ads">${ST.ads}</b><span>ads watched</span></div><div><b id="s-at">${fmtT(ST.adTime)}</b><span>in ads</span></div><div><b id="s-pt">${fmtT(ST.playTime)}</b><span>actually playing</span></div></div>
   <button class="feat" style="--g1:${f.g[0]};--g2:${f.g[1]}"><canvas></canvas><div class="fx"><span class="ftag">⭐ EDITOR'S CHOICE · Ad</span><div class="fname">${f.name}</div><div class="fhook">${f.hook}</div><span class="fplay">▶ PLAY FREE</span></div></button>
   <div class="sec">🔥 Top Free Games <small>pick your poison</small></div>
-  <div class="grid">${GAMES.map((g,i)=>`<button class="card" data-i="${i}" style="--g1:${g.g[0]};--g2:${g.g[1]};--d:${(i*.37)%2}s">
+  <div class="grid">${GAMES.map((g,i)=>[g,i]).sort((a,b)=>(b[0].noAds?1:0)-(a[0].noAds?1:0)).map(([g,i])=>`<button class="card${g.noAds?' wide':''}" data-i="${i}" style="--g1:${g.g[0]};--g2:${g.g[1]};--d:${(i*.37)%2}s">
       <canvas class="cthumb"></canvas>
-      <span class="cbadge ${i%3===0?'ad':''}">${i%3===0?'Ad':i%3===1?'#'+(i+1)+' '+g.cat:'🔥 HOT'}</span>
+      <span class="cbadge ${g.noAds?'ok':i%3===0?'ad':''}">${g.noAds?'✅ NO ADS · REAL GAME':i%3===0?'Ad':i%3===1?'#'+(i+1)+' '+g.cat:'🔥 HOT'}</span>
       <div class="cbody"><span class="cicon">${g.icon}</span><div class="ctext"><div class="cname">${g.name}</div><div class="cmeta">★ ${g.rating} · ${g.dl}</div></div></div></button>`).join('')}</div>
   <div class="foot">*Gameplay footage may not represent actual gameplay.<br>Or any gameplay. Ever.<br>You have been redirected by ads ${ST.hijacks} time${ST.hijacks===1?'':'s'}.</div>`;
   mountAd($('.feat canvas',home),f);
@@ -800,7 +805,7 @@ setInterval(()=>{const a=$('#s-ads');if(a&&$('#home').classList.contains('on')){
    STORE PAGE
    ===================================================================== */
 function openStore(g){
-  const reviews=[
+  const reviews=g.reviews||[
     ['xX_N00bSlayer_Xx',5,'EXACTLY like the ads!!! 10/10 would watch 400 ads again'],
     ['definitely_not_a_bot_8812',5,'Great game. Great game. Great game. Great game.'],
     ['Grandma Pat',5,`I don't know what any of this is but the colors are nice`],
@@ -810,13 +815,13 @@ function openStore(g){
   const st=$('#store');
   st.innerHTML=`<div class="topbar"><button class="back">‹</button><span class="t">Game Store</span></div>
   <div class="st-scroll">
-   <div class="st-media"><canvas></canvas><span class="badge l">▶ GAMEPLAY*</span><span class="badge r">Ad</span><span class="badge b">*Not actual gameplay. Footage is for illustrative purposes.</span></div>
+   <div class="st-media"><canvas></canvas><span class="badge l">▶ ${g.noAds?"REAL GAMEPLAY":"GAMEPLAY*"}</span><span class="badge r" ${g.noAds?'style="background:#2f9e44;color:#fff"':""}>${g.noAds?"✅ No ads":"Ad"}</span><span class="badge b">${g.noAds?"This is actual gameplay. We checked twice.":"*Not actual gameplay. Footage is for illustrative purposes."}</span></div>
    <div class="st-info" style="--g1:${g.g[0]};--g2:${g.g[1]}"><div class="st-ico">${g.icon}</div><div><div class="st-name">${g.name}</div><div class="st-dev">Totally Real Games Ltd. · ${g.cat}</div></div></div>
-   <div class="st-row"><div>★ ${g.rating}<small>12M reviews</small></div><div>${g.dl}<small>downloads</small></div><div>3+<small>ads 18+</small></div><div>📺 99%<small>ad content</small></div></div>
+   <div class="st-row"><div>★ ${g.rating}<small>12M reviews</small></div><div>${g.dl}<small>downloads</small></div><div>3+<small>ads 18+</small></div><div>📺 ${g.noAds?"0%":"99%"}<small>ad content</small></div></div>
    <button class="install pulse"><i class="bar"></i><span>INSTALL · FREE</span></button>
    <div class="rev-h">Ratings & reviews</div>
    ${reviews.filter(r=>r[1]===5).map(r=>`<div class="rev"><div class="who">${r[0]}<span>${'★'.repeat(r[1])}</span></div><p>${r[2]}</p></div>`).join('')}
-   <div class="rev hidden">2,384,112 one-star reviews hidden by the developer 🙈 <u class="show1">show</u></div>
+   <div class="rev hidden">${g.noAds?"1 one-star review, from the pop-ups":"2,384,112 one-star reviews hidden by the developer 🙈"} <u class="show1">show</u></div>
    <div class="foot">Contains ads · In-app purchases · Gameplay may vary from video</div>
   </div>`;
   mountAd($('.st-media canvas',st),g);
@@ -1005,7 +1010,134 @@ function StackGame(W,H,th,lv){
     revive(){const top=blocks[blocks.length-1];if(top.w<w0*.5)top.w=w0*.5;cur={x:0,w:top.w,d:1};self.status='play';}};
   return self;
 }
-const REAL={match:MatchGame,runner:RunnerGame,tapper:TapperGame,stacker:StackGame};
+/* =====================================================================
+   MAZE MUNCHER — an original maze-chase game. The one game with no ads.
+   You're a sprout blob; ad pop-up windows hunt you; Ad Blockers fight back.
+   ===================================================================== */
+const MAZE_L=["##########","#o.......#","#.##.###.#","#.........","#.##.#.###","#....#...#","####.###.#","####.#....","####.#.## ","####.#.#GG","####.#.###","####.#....","####.#.###","#........#","#.##.###.#","#o.#.....P","##.#.#.###","#....#...#","#.######.#","#.........","##########"];
+const MAZE=MAZE_L.map(l=>l+l.slice(0,9).split('').reverse().join(''));
+const DIRS=[[-1,0],[1,0],[0,-1],[0,1]];
+function MazeGame(W,H,th,lv,sess,demo=false){
+  const COLS=19,ROWS=21;
+  const st=sess?(sess.maze||(sess.maze={score:0,lives:3})):{score:0,lives:3};
+  const top=demo?112:64,T=Math.floor(Math.min((W-12)/COLS,(H-top-(demo?40:150))/ROWS));
+  const ox=Math.round((W-T*COLS)/2),oy=top;
+  const grid=MAZE.map(r=>r.split(''));let coins=0;
+  const cell=grid.map(r=>r.map(c=>{if(c==='.'||c==='o'){coins++;return c==='.'?1:2;}return 0;}));
+  const wall=(x,y)=>{if(x<0||y<0||x>=COLS||y>=ROWS)return true;const c=grid[y][x];return c==='#'||c===' '||c==='G';};
+  const hue=[255,190,320,28,140][(lv-1)%5];
+  const bgCache=new Map();
+  function mazeImg(scale){const key=Math.round(scale*4)/4||.25;let c=bgCache.get(key);if(c)return c;
+    c=mk(Math.ceil(COLS*T*key),Math.ceil(ROWS*T*key),g=>{g.scale(key,key);
+      const pass=(w,col,blur)=>{g.fillStyle=col;g.shadowColor=col;g.shadowBlur=blur;
+        for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){if(grid[y][x]!=='#')continue;const cx=x*T+T/2,cy=y*T+T/2;
+          g.beginPath();g.arc(cx,cy,w/2,0,Math.PI*2);g.fill();
+          if(x+1<COLS&&grid[y][x+1]==='#')g.fillRect(cx,cy-w/2,T,w);
+          if(y+1<ROWS&&grid[y+1][x]==='#')g.fillRect(cx-w/2,cy,w,T);
+          if(x+1<COLS&&y+1<ROWS&&grid[y][x+1]==='#'&&grid[y+1][x]==='#'&&grid[y+1][x+1]==='#')g.fillRect(cx,cy,T,T);}};
+      pass(T*.7,`hsl(${hue},100%,62%)`,T*.6);pass(T*.44,`hsl(${hue},70%,13%)`,0);
+      g.shadowBlur=0;g.fillStyle='#ff8fab';g.fillRect(9*T+2,8*T+T*.4,T-4,T*.2);});
+    bgCache.set(key,c);return c;}
+  const P={x:9,y:15,d:[0,0],q:[-1,0],p:0,face:[-1,0],chomp:0};
+  const EC=[['#ff4d6d','AD'],['#4dabf7','BUY'],['#ffa94d','WIN'],['#da77f2','FREE']];
+  const homes=[[9,9],[8,9],[10,9],[9,9]];
+  let E=[],clock=0,ready=1.8,dying=0,clearT=0,power=0,combo=200,pops=[],parts=[],t=0;
+  function resetActors(){P.x=9;P.y=15;P.d=[0,0];P.q=[-1,0];P.p=0;E=homes.map((h,i)=>({i,x:h[0],y:h[1],d:[0,0],p:0,mode:'house',rel:i*2.6,t:0,fr:false}));clock=0;power=0;}
+  resetActors();
+  const pos=e=>[e.x+e.d[0]*e.p,e.y+e.d[1]*e.p];
+  const scr=(gx,gy)=>[ox+gx*T+T/2,oy+gy*T+T/2];
+  const open=(x,y,d)=>!wall(x+d[0],y+d[1]);
+  function step(e,speed,dt,arrive){e.p+=speed*dt;let n=0;while(e.p>=1&&n++<3){e.x+=e.d[0];e.y+=e.d[1];e.p-=1;arrive(e);if(!e.d[0]&&!e.d[1]){e.p=0;break;}}}
+  function eat(){const c=cell[P.y][P.x];if(!c)return;cell[P.y][P.x]=0;coins--;P.chomp=.25;
+    if(c===1){st.score+=10;parts.push({x:P.x,y:P.y,t:0,k:1});}
+    else{st.score+=50;power=Math.max(3.5,7-lv*.4);combo=200;for(const e of E)if(e.mode==='run'){e.fr=true;e.d=[-e.d[0],-e.d[1]];e.x-=e.d[0];e.p=1-e.p;e.y-=e.d[1];}pops.push({x:P.x,y:P.y,t:0,s:'AD BLOCKER ON! 🛡️',big:1});}}
+  function playerArrive(){eat();if(open(P.x,P.y,P.q))P.d=P.q.slice();else if(!open(P.x,P.y,P.d))P.d=[0,0];if(P.d[0]||P.d[1])P.face=P.d.slice();}
+  function autopilot(){const danger=new Set();for(const e of E)if(e.mode==='run'&&!e.fr){const[a,b]=pos(e);for(let dx=-2;dx<=2;dx++)for(let dy=-2;dy<=2;dy++)danger.add((Math.round(a)+dx)+','+(Math.round(b)+dy));}
+    const seen=new Set([P.x+','+P.y]),qu=[];for(const d of DIRS)if(open(P.x,P.y,d)){const k=(P.x+d[0])+','+(P.y+d[1]);if(danger.has(k))continue;seen.add(k);qu.push([P.x+d[0],P.y+d[1],d]);}
+    while(qu.length){const[x,y,f]=qu.shift();if(cell[y][x]){P.q=f.slice();return;}for(const d of DIRS)if(open(x,y,d)){const k=(x+d[0])+','+(y+d[1]);if(seen.has(k)||danger.has(k))continue;seen.add(k);qu.push([x+d[0],y+d[1],f]);}}
+    const ok=DIRS.filter(d=>open(P.x,P.y,d));if(ok.length)P.q=pick(ok).slice();}
+  function enemyArrive(e){const opts=DIRS.filter(d=>open(e.x,e.y,d)&&!(d[0]===-e.d[0]&&d[1]===-e.d[1]));const choices=opts.length?opts:DIRS.filter(d=>open(e.x,e.y,d));if(!choices.length){e.d=[0,0];return;}
+    if(e.fr||Math.random()<(e.i===0?.04:.12)){e.d=pick(choices).slice();return;}
+    const dist=Math.hypot(P.x-e.x,P.y-e.y);let tg=[P.x,P.y];
+    if(e.i===1)tg=[P.x+P.face[0]*4,P.y+P.face[1]*4];else if(e.i===2&&dist>7)tg=[[1,1],[17,1],[1,19],[17,19]][Math.floor(clock/5)%4];else if(e.i===3&&dist<6)tg=[17,19];
+    let best=null,bd=1e9;for(const d of choices){const v=(e.x+d[0]-tg[0])**2+(e.y+d[1]-tg[1])**2;if(v<bd){bd=v;best=d;}}e.d=best.slice();}
+  function die(){dying=1.3;P.chomp=0;}
+  const self={status:'play',
+    get score(){return st.score;},
+    update(dt){t+=dt;pops=pops.filter(p=>(p.t+=dt)<1);parts=parts.filter(p=>(p.t+=dt)<.4);P.chomp=Math.max(0,P.chomp-dt);
+      if(clearT){clearT-=dt;if(clearT<=0){clearT=0;self.status='win';}return;}
+      if(dying){dying-=dt;if(dying<=0){dying=0;st.lives--;if(st.lives<=0){self.status='fail';return;}resetActors();ready=1.4;}return;}
+      if(ready>0){ready-=dt;return;}
+      clock+=dt;if(power>0){power-=dt;if(power<=0)for(const e of E)e.fr=false;}
+      if(demo&&(!P.d[0]&&!P.d[1]||P.p<.08))autopilot();
+      if((P.q[0]===-P.d[0]&&P.q[1]===-P.d[1])&&(P.d[0]||P.d[1])){P.x+=P.d[0];P.y+=P.d[1];P.d=P.q.slice();P.p=1-P.p;P.face=P.d.slice();}
+      if(!P.d[0]&&!P.d[1]){if(open(P.x,P.y,P.q)){P.d=P.q.slice();P.face=P.d.slice();}}
+      step(P,6.4+lv*.12,dt,()=>{playerArrive();if(demo)autopilot();});
+      const es=Math.min(7,5.0+lv*.28);
+      for(const e of E){
+        if(e.mode==='house'){if(clock>e.rel){e.mode='exit';e.t=0;}continue;}
+        if(e.mode==='exit'){e.t+=dt/.8;if(e.t>=1){e.mode='run';e.x=9;e.y=7;e.p=0;e.d=Math.random()<.5?[-1,0]:[1,0];}continue;}
+        if(e.mode==='gone'){e.t-=dt;if(e.t<=0){e.mode='exit';e.t=0;e.fr=false;const h=homes[e.i];e.x=h[0];e.y=h[1];}continue;}
+        step(e,e.fr?3.2:es,dt,enemyArrive);
+        const[a,b]=pos(e),[c,d]=pos(P);if(Math.hypot(a-c,b-d)<.62){
+          if(e.fr){e.mode='gone';e.t=2.5;st.score+=combo;pops.push({x:a,y:b,t:0,s:'+'+combo});combo*=2;parts.push({x:a,y:b,t:0,k:2});}
+          else{die();return;}}}
+      if(coins<=0)clearT=1.4;},
+    draw(){X.fillStyle=rg(W/2,H*.45,Math.max(W,H)*.8,['#1a1446','#0b0920','#050410']);X.fillRect(0,0,W,H);
+      if(!demo){panel(10,10,W*.36,40,16,'#2b1055',{depth:4,gloss:false});tx('🪙 '+st.score,10+W*.18,30,18,'#ffe066','#000',W*.33);
+        panel(W*.62,10,W*.38-10,40,16,'#2b1055',{depth:4,gloss:false});for(let i=0;i<st.lives;i++)blob(W*.62+24+i*28,30,10,[1,0],0,t+i);
+        tx('LV '+lv,W/2,30,18,'#fff','#000');}
+      const sc=X.getTransform().a,img=mazeImg(sc);
+      if(clearT&&Math.floor(clearT*8)%2)X.globalAlpha=.4;X.drawImage(img,ox,oy,COLS*T,ROWS*T);X.globalAlpha=1;
+      for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const c=cell[y][x];if(!c)continue;const[sx,sy]=scr(x,y);
+        if(c===1){circ(sx,sy,T*.14,'#ffd43b');circ(sx-T*.04,sy-T*.04,T*.05,'#fff9db');}
+        else{const k=1+Math.sin(t*6)*.12;glow(sx,sy,T*1.2,'rgba(120,255,200,.4)');em('🛡️',sx,sy,T*.9*k,{ol:true});}}
+      if(power>0){X.fillStyle=`rgba(80,255,180,${.06+.03*Math.sin(t*8)})`;X.fillRect(0,0,W,H);}
+      for(const e of E){if(e.mode==='gone')continue;let gx,gy;
+        if(e.mode==='exit'){const h=homes[e.i],q=e.t;if(q<.5){gx=lerp(h[0],9,q*2);gy=9;}else{gx=9;gy=lerp(9,7,(q-.5)*2);}}
+        else if(e.mode==='house'){gx=e.x;gy=e.y+Math.sin(t*5+e.i)*.15;}else[gx,gy]=pos(e);
+        const[sx,sy]=scr(gx,gy);popWin(sx,sy,T,EC[e.i],e.fr,power,e.d,t+e.i);}
+      const[px,py]=pos(P),[sx,sy]=scr(px,py);
+      if(dying){const q=1-dying/1.3;X.save();X.translate(sx,sy);X.rotate(q*10);X.scale(1-q,1-q);blob(0,0,T*.5,P.face,0,t);X.restore();if(q>.6)for(let i=0;i<8;i++){const a=i*Math.PI/4;spark(sx+Math.cos(a)*q*T*1.5,sy+Math.sin(a)*q*T*1.5,T*.3,1-q);}}
+      else blob(sx,sy,T*.5,P.face,P.chomp,t,(P.d[0]||P.d[1])&&ready<=0);
+      for(const p of parts){const[a,b]=scr(p.x,p.y),q=p.t/.4;if(p.k===1)circ(a,b,T*.15+q*T*.4,null,`rgba(255,220,80,${1-q})`,2);else impact(a,b,q,T/30);}
+      for(const p of pops){const[a,b]=scr(p.x,p.y),q=p.t;X.save();X.globalAlpha=1-q;tx(p.s,p.big?W/2:a,(p.big?oy+ROWS*T*.42:b)-q*30,p.big?24:16,p.big?'#8ce99a':'#ffe066','#000',W-20);X.restore();}
+      if(ready>0&&!dying){const k=ready>.5?'READY?':'GO!';tx(k,W/2,oy+T*13.5,T*1.3,'#ffe066','#2a0d4a');}
+      if(demo){headline('NO ADS. REALLY. 🤯',t,60,30,'#8ce99a');pill(W/2,96,'✅ ACTUAL GAMEPLAY','#2f9e44','#fff',14);tx('eat coins · dodge pop-ups · grab 🛡️',W/2,oy+ROWS*T+26,15,'#fff','#000');}
+      else dpad();},
+    tap(x,y){const b=dpadHit(x,y);if(b){P.q=b;return;}const[px,py]=pos(P),[sx,sy]=scr(px,py);const dx=x-sx,dy=y-sy;if(Math.abs(dx)<4&&Math.abs(dy)<4)return;P.q=Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)];},
+    swipe(dx,dy){P.q=Math.abs(dx)>Math.abs(dy)?[Math.sign(dx),0]:[0,Math.sign(dy)];},
+    key(d){P.q=d;},
+    revive(){st.lives=Math.max(1,st.lives);resetActors();ready=1.4;dying=0;self.status='play';}};
+  const padY=oy+ROWS*T+(H-(oy+ROWS*T))/2,bs=Math.min(52,(H-(oy+ROWS*T))*.3);
+  const padB=[[[0,-1],0,-1,'▲'],[[0,1],0,1,'▼'],[[-1,0],-1,0,'◀'],[[1,0],1,0,'▶']];
+  function dpad(){if(bs<26)return;for(const[d,ix,iy,a]of padB){const x=W/2+ix*bs*1.15,y=padY+iy*bs*1.05;const on=P.q[0]===d[0]&&P.q[1]===d[1];panel(x-bs/2,y-bs/2,bs,bs,bs*.3,on?'#7048e8':'#3b2a6b',{depth:4});tx(a,x,y+1,bs*.42,'#fff',null);}}
+  function dpadHit(x,y){if(bs<26)return null;for(const[d,ix,iy]of padB){const cx=W/2+ix*bs*1.15,cy=padY+iy*bs*1.05;if(Math.abs(x-cx)<bs*.6&&Math.abs(y-cy)<bs*.6)return d;}return null;}
+  return self;
+}
+function blob(x,y,r,face,chomp,t,moving=false){const sq=moving?Math.sin(t*18)*.07:Math.sin(t*3)*.03;X.save();X.translate(x,y);
+  shad(0,r*.95,r*.9,.35);X.scale(1+sq,1-sq);
+  line([[0,-r*.9],[r*.1,-r*1.25]],'#2b8a3e',r*.14);X.save();X.translate(r*.18,-r*1.28);X.rotate(-.5+Math.sin(t*4)*.2);ell(0,0,r*.3,r*.14,'#69db7c');X.restore();
+  circ(0,0,r,rg(0,0,r,['#c3fae8','#38d9a9','#0c8a6e'],-r*.35,-r*.45));circ(-r*.35,-r*.4,r*.2,'rgba(255,255,255,.6)');
+  const fx=face[0]*r*.22,fy=face[1]*r*.22;
+  for(const s of[-1,1]){circ(s*r*.32+fx,-r*.12+fy,r*.25,'#fff');circ(s*r*.32+fx*1.4,-r*.1+fy*1.4,r*.12,'#1a1033');}
+  const m=chomp>0?Math.abs(Math.sin(chomp*25)):0;ell(fx*.8,r*.38+fy*.6,r*.2,r*(.06+m*.16),'#3b0d2a');
+  circ(-r*.6+fx*.5,r*.18,r*.1,'rgba(255,120,160,.5)');circ(r*.6+fx*.5,r*.18,r*.1,'rgba(255,120,160,.5)');X.restore();}
+function popWin(x,y,T,[col,lab],fr,power,d,t){const w=T*1.2,hh=T*1.05,blink=fr&&power<1.6&&Math.floor(t*8)%2;const c=fr?(blink?'#f1f3f5':'#868e96'):col;
+  X.save();X.translate(x,y+Math.sin(t*6)*T*.04);X.rotate(Math.sin(t*7)*.07);shad(0,hh*.6,w*.5,.35);
+  rr(-w/2,-hh/2,w,hh,T*.18,fr?'#495057':'#ffffff');rr(-w/2,-hh/2,w,hh*.34,[T*.18,T*.18,0,0],lin(-hh/2,-hh/2+hh*.34,[shadeC(c,.25),c]));
+  tx(fr?'✕':lab,-w*.14,-hh/2+hh*.17,T*.26,'#fff',null);tx('✕',w*.34,-hh/2+hh*.17,T*.22,'#fff',null);
+  const ex=(d[0]||0)*T*.08,ey=(d[1]||0)*T*.06;
+  if(fr){line([[-w*.3,hh*.12],[-w*.12,hh*.22]],'#f1f3f5',T*.07);line([[-w*.3,hh*.22],[-w*.12,hh*.12]],'#f1f3f5',T*.07);line([[w*.12,hh*.12],[w*.3,hh*.22]],'#f1f3f5',T*.07);line([[w*.12,hh*.22],[w*.3,hh*.12]],'#f1f3f5',T*.07);}
+  else for(const s of[-1,1]){circ(s*w*.2+ex,hh*.14+ey,T*.15,'#fff','#1a1033',1.5);circ(s*w*.2+ex*1.8,hh*.16+ey*1.8,T*.07,'#1a1033');line([[s*w*.34,-hh*.03],[s*w*.08,hh*.04]],'#1a1033',T*.06);}
+  rr(-w/2,-hh/2,w,hh,T*.18,null,'rgba(0,0,0,.35)',1.5);X.restore();}
+let MDEMO=null,MDEMO_T=0;
+function adMaze(t){const now=performance.now();
+  if(!MDEMO){MDEMO=MazeGame(360,640,[],1,null,true);MDEMO_T=now;}
+  if(now-MDEMO_T>5){const dt=Math.min(.05,(now-MDEMO_T)/1000);MDEMO_T=now;MDEMO.update(dt);if(MDEMO.status!=='play')MDEMO=MazeGame(360,640,[],1,null,true);}
+  MDEMO.draw();}
+
+const REAL={match:MatchGame,runner:RunnerGame,tapper:TapperGame,stacker:StackGame,maze:MazeGame};
 
 /* =====================================================================
    SESSION (playing an installed game)
@@ -1017,17 +1149,19 @@ function startGame(g){
   const s=S={g,dead:false,level:1,energy:5,gems:0,phase:'loading',real:null,W:0,H:0,nextInt:rand(6,9),adT:0,playT:0,bannerIv:null};
   const el=$('#game');
   el.style.setProperty('--g1',g.g[0]);el.style.setProperty('--g2',g.g[1]);
-  el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip en">⚡ 5/5</span><span class="chip gm">💎 0</span><button class="chip noads">🚫 NO ADS</button></div>
+  if(g.noAds){el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip" style="margin-left:auto;background:linear-gradient(#51cf66,#2b8a3e)">✅ NO ADS (REALLY)</span></div><div class="ratio"><div class="ad"></div><div class="lbl"><span>📺 Ads 0%</span><span>🎮 Game 100%</span></div></div><div class="stage"><canvas></canvas></div>`;}
+  else el.innerHTML=`<div class="hud"><button class="chip home">🏠</button><span class="chip lv">Lv 1</span><span class="chip en">⚡ 5/5</span><span class="chip gm">💎 0</span><button class="chip noads">🚫 NO ADS</button></div>
    <div class="ratio"><div class="ad"></div><div class="lbl"><span>📺 Ads 0%</span><span>🎮 Game 0%</span></div></div>
    <div class="stage"><canvas></canvas><button class="gift">🎁</button>
      <div class="splash"><div class="si">${g.icon}</div><div class="sn">${g.name}</div><div class="ss">${REALNAME[g.real]} Edition</div><div class="lbar"><i></i></div><div class="lpct">0%</div><div class="tip"></div></div></div>
    <div class="bannerad"></div>`;
   show('game');
   $('.home',el).onclick=()=>leaveFlow(s);
-  $('.noads',el).onclick=()=>noAdsFlow(s);
-  $('.gift',el).onclick=()=>{if(s.phase!=='play'||OV.busy())return;s.phase='int';toast('🎁 Your free gift is… an ad!');showAd(g).then(r=>{if(dead(s)||r!=='ok')return;s.gems+=1;hud(s);toast('🎁 +1 💎');s.phase='play';});};
+  if(!g.noAds){$('.noads',el).onclick=()=>noAdsFlow(s);$('.gift',el).onclick=()=>{if(s.phase!=='play'||OV.busy())return;s.phase='int';toast('🎁 Your free gift is… an ad!');showAd(g).then(r=>{if(dead(s)||r!=='ok')return;s.gems+=1;hud(s);toast('🎁 +1 💎');s.phase='play';});};}
   const cv=$('.stage canvas',el);
-  cv.onpointerdown=e=>{if(!s.real||s.phase!=='play'||OV.busy())return;const r=cv.getBoundingClientRect();const sc=Math.min(r.width/s.W,r.height/s.H);const ox=(r.width-s.W*sc)/2,oy=(r.height-s.H*sc)/2;s.real.tap((e.clientX-r.left-ox)/sc,(e.clientY-r.top-oy)/sc);};
+  cv.onpointerdown=e=>{if(!s.real||s.phase!=='play'||OV.busy())return;const r=cv.getBoundingClientRect();const sc=Math.min(r.width/s.W,r.height/s.H);const ox=(r.width-s.W*sc)/2,oy=(r.height-s.H*sc)/2;s.real.tap((e.clientX-r.left-ox)/sc,(e.clientY-r.top-oy)/sc);cv._sx=e.clientX;cv._sy=e.clientY;};
+  cv.onpointerup=e=>{if(!s.real||!s.real.swipe||s.phase!=='play'||OV.busy()||cv._sx==null)return;const dx=e.clientX-cv._sx,dy=e.clientY-cv._sy;cv._sx=null;if(Math.hypot(dx,dy)>24)s.real.swipe(dx,dy);};
+  if(g.noAds){startLevel(s);toast('✅ No ads in this one. Enjoy!',2500);return;}
   rotateBanner(s);s.bannerIv=setInterval(()=>{if(dead(s)){clearInterval(s.bannerIv);return;}rotateBanner(s);},4500);
   splash(s);
 }
@@ -1036,7 +1170,7 @@ function rotateBanner(s){const b=$('#game .bannerad');if(!b)return;const g=pickA
   b.innerHTML=`<span class="btag">Ad</span><div class="bi">${g.icon}</div><div class="bt"><b>${g.name}</b><small>${g.hook}</small></div><div class="bb">INSTALL</div>`;
   b.classList.remove('swap');void b.offsetWidth;b.classList.add('swap');
   b.onclick=()=>{if(dead(s))return;toast('Oops — you tapped a banner 🙃');ST.ads++;hijack(g);};}
-function hud(s){const el=$('#game');if(!el||dead(s))return;$('.lv',el).textContent='Lv '+s.level;$('.en',el).textContent=`⚡ ${s.energy}/5`;$('.gm',el).textContent='💎 '+s.gems;}
+function hud(s){const el=$('#game');if(!el||dead(s))return;if(s.g.noAds){$('.lv',el).textContent='Lv '+s.level;return;}$('.lv',el).textContent='Lv '+s.level;$('.en',el).textContent=`⚡ ${s.energy}/5`;$('.gm',el).textContent='💎 '+s.gems;}
 function updRatio(s){const el=$('#game .ratio');if(!el)return;const tot=s.adT+s.playT||1;const a=Math.round(100*s.adT/tot);$('.ad',el).style.width=a+'%';const sp=el.querySelectorAll('.lbl span');sp[0].textContent=`📺 Ads ${a}%`;sp[1].textContent=`🎮 Game ${100-a}%`;}
 function hijack(g){closeAll();if(S){S.dead=true;clearInterval(S.bannerIv);S=null;}ST.hijacks++;openStore(g);setTimeout(()=>toast('📲 You got redirected to the store. Classic.'),200);}
 function endSession(){if(S){S.dead=true;clearInterval(S.bannerIv);S=null;}closeAll();}
@@ -1060,15 +1194,16 @@ async function adBlock(s){const r=await showAd(s.g);return dead(s)||r!=='ok';}
 
 function startLevel(s){
   const st=$('#game .stage');const r=st.getBoundingClientRect();s.W=r.width;s.H=r.height;
-  s.real=REAL[s.g.real](s.W,s.H,s.g.theme,s.level);s.real.onGem=()=>{s.gems++;hud(s);};
+  s.real=REAL[s.g.real](s.W,s.H,s.g.theme,s.level,s);s.real.onGem=()=>{s.gems++;hud(s);};
   hud(s);s.phase='intro';
-  const b=h(`<div class="lvl"><b>LEVEL ${s.level}</b><span>${s.level===1?'Tutorial':pick(['Super Hard 💀','Boss Level 👹','Easy 😌','Like in the ad!*'])}</span></div>`);st.appendChild(b);
+  const b=h(`<div class="lvl"><b>LEVEL ${s.level}</b><span>${s.g.noAds?'No ads. Just maze.':s.level===1?'Tutorial':pick(['Super Hard 💀','Boss Level 👹','Easy 😌','Like in the ad!*'])}</span></div>`);st.appendChild(b);
   setTimeout(()=>{b.remove();if(!dead(s)&&s.phase==='intro'){s.phase='play';s.nextInt=rand(5,8);}},1300);
 }
 function confettiDom(){const st=$('#game .stage');if(!st)return;const c=h('<div class="confetti"></div>');for(let i=0;i<50;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=`hsl(${Math.random()*360},90%,60%)`;p.style.animationDelay=Math.random()*.6+'s';p.style.animationDuration=rand(1.2,2.2)+'s';c.appendChild(p);}st.appendChild(c);setTimeout(()=>c.remove(),3000);}
 
 async function levelWin(s){
   s.phase='done';confettiDom();
+  if(s.g.noAds){await popup({cls:'green',title:'MAZE CLEARED! 🎉',html:`<div class="big">🌱</div>Score: <b>${s.maze.score}</b><br><small style="opacity:.7">No ads were harmed in the making of this level.</small>`,buttons:[{label:'NEXT LEVEL ▶',cls:'green pulse',value:1}]});if(dead(s))return;s.level++;startLevel(s);return;}
   const r=await popup({cls:'green',title:'LEVEL COMPLETE! 🎉',html:`<div class="big">⭐⭐⭐</div>Reward: <b>+10 💎</b>`,buttons:[{label:'🎬 CLAIM x3',cls:'gold pulse',value:'x3'},{label:'No thanks',cls:'link',value:'no',delay:2500}]});
   if(dead(s))return;
   if(r==='no'){const r2=await popup({cls:'red',title:'Are you sure? 🥺',html:'You will lose <b>20 💎</b> FOREVER.<br>Think of the gems.',buttons:[{label:'🎬 Watch ad',cls:'green',value:'ad'},{label:"I'm sure",cls:'link',value:'sure',delay:1500}]});if(dead(s))return;if(r2==='sure')toast('Okay! Here is an ad anyway 🙂');}
@@ -1082,6 +1217,12 @@ async function levelWin(s){
 }
 async function levelFail(s){
   s.phase='done';
+  if(s.g.noAds){const sc=s.maze.score;const best=ST.mazeBest=Math.max(ST.mazeBest||0,sc);
+    const r=await popup({cls:'red',title:'GAME OVER',html:`<div class="big">🫠</div>Score: <b>${sc}</b><br>Best: <b>${best}</b>`,buttons:[{label:'PLAY AGAIN',cls:'green pulse',value:'again'},{label:'🎬 Watch an ad to continue (optional!)',cls:'link',value:'ad'},{label:'🏠 Home',cls:'link',value:'home'}]});
+    if(dead(s))return;
+    if(r==='home'){endSession();renderHome();return;}
+    if(r==='ad'){toast('You asked for this 🙃');if(await adBlock(s))return;s.maze.lives=1;s.real.revive();s.phase='play';return;}
+    s.maze={score:0,lives:3};s.level=1;startLevel(s);return;}
   const r=await popup({cls:'red',title:s.g.real==='runner'?'YOU CRASHED 💥':'TOWER FELL 💥',html:'<div class="big">😵</div>So close! Continue?',buttons:[{label:'🎬 REVIVE',cls:'green pulse',value:'rev'},{label:'Give up',cls:'link',value:'no',delay:2000}]});
   if(dead(s))return;
   if(r==='no')toast('Giving up costs one ad 🙂');
@@ -1140,6 +1281,7 @@ async function interrupt(s){
   s.phase='play';s.nextInt=rand(7,11);
 }
 async function leaveFlow(s){
+  if(s.g&&s.g.noAds&&!OV.busy()){endSession();renderHome();return;}
   if(dead(s)||OV.busy()||s.phase==='loading')return;
   const prev=s.phase;s.phase='int';
   const r=await popup({title:'Leaving so soon? 😢',html:'Watch one last ad as a goodbye?',buttons:[{label:'📺 Sure!',cls:'green',value:'y'},{label:'Leave',cls:'link',value:'n',delay:1500}],closeAfter:1500});
@@ -1175,7 +1317,7 @@ function frame(now){
       if(s.real.status==='win')levelWin(s);
       else if(s.real.status==='fail')levelFail(s);
       else if(s.real.wantBoost){s.real.wantBoost=false;boostFlow(s);}
-      else if(s.nextInt<=0)interrupt(s);
+      else if(s.nextInt<=0&&!s.g.noAds)interrupt(s);
     }
     const cv=$('#game .stage canvas');
     if(cv){const dpr=Math.min(2,devicePixelRatio||1),cw=cv.clientWidth,ch=cv.clientHeight;if(cw&&ch){const w=Math.round(cw*dpr),hh=Math.round(ch*dpr);if(cv.width!==w||cv.height!==hh){cv.width=w;cv.height=hh;}
@@ -1185,6 +1327,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 addEventListener('keydown',e=>{const s=S;if(!s||!s.real||s.phase!=='play'||OV.busy())return;
+  if(s.real.key){const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]}[e.key];if(m){e.preventDefault();s.real.key(m);}return;}
   if(e.key==='ArrowLeft')s.real.tap(s.W*.25,s.H*.5);else if(e.key==='ArrowRight')s.real.tap(s.W*.75,s.H*.5);else if(e.key===' '||e.key==='Enter'){e.preventDefault();s.real.tap(s.W*.5,s.H*.4);}});
 
 renderHome();
