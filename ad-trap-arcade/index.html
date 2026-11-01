@@ -826,9 +826,9 @@ function openStore(g){
   btn.onclick=()=>{
     if(state===1)return;
     if(state===2){startGame(g);return;}
-    state=1;btn.classList.remove('pulse');const bar=$('.bar',btn),lab=$('span',btn);let p=0;
+    state=1;btn.classList.remove('pulse');const bar=$('.bar',btn),lab=$('span',btn);let p=0,stalled=false;
     const iv=setInterval(()=>{p+=p<99?rand(3,9):0;p=Math.min(p,99);bar.style.width=p+'%';lab.textContent=p<99?`Downloading… ${Math.floor(p)}%`:'99%… almost there…';
-      if(p>=99&&!iv.stall){iv.stall=1;setTimeout(()=>{clearInterval(iv);bar.style.width='100%';lab.textContent='▶ OPEN';btn.classList.add('pulse');state=2;},1300);}},90);
+      if(p>=99&&!stalled){stalled=true;clearInterval(iv);setTimeout(()=>{bar.style.width='100%';lab.textContent='▶ OPEN';btn.classList.add('pulse');state=2;},1300);}},90);
   };
   show('store');$('.st-scroll',st).scrollTop=0;
 }
