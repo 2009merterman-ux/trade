@@ -77,9 +77,9 @@ src/
   ui/                HUD, menus, catch card, case opening, upgrader
 ```
 
-## Also in this repo: Left Field
+## Also in this repo: Rare Air
 
-`leftfield/` is a separate, self-contained trivia game (no build step). Seven "Name a…" prompts per game, 25 seconds each; any answer on the list scores, and less obvious answers score more (10 to 100, 700 max). Typos are corrected to the closest accepted answer, and you can play game after game: categories are dealt from a deck that only reshuffles once everything has come up.
+`leftfield/` is a separate, self-contained trivia game (no build step). Each flight is seven "Name a…" prompts with 25 seconds each. Every accepted answer fires a rocket's engine: Common +10 km, Uncommon +25, Rare +50, Epic +75, Legendary +100. The rocket climbs past real landmarks (Everest, the Kármán line at 100 km, the ISS, Hubble), so a perfect flight reaches 700 km. Typos are corrected to the closest accepted answer, and you can fly again as often as you like. Categories come from a deck that only reshuffles once every category has come up.
 
 - Play: open `leftfield/index.html` in a browser.
 - `leftfield/data.js` is the prompt bank (add a category with one `C(...)` call), `leftfield/match.js` is the typo-tolerant matcher.

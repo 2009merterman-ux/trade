@@ -1,130 +1,169 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>Left Field</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Graduate&display=swap">
+<title>Rare Air</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600;700&display=swap">
 <style>
-  /* Layout: a ballpark scoreboard. Line score across the top, one at-bat (prompt) in the middle. Single dark look by choice. */
+  /* Layout: a full-screen sky on canvas; the HUD floats on top, the prompt panel sits at the bottom. Single night-flight look by choice. */
   :root {
     color-scheme: dark;
-    --board: #0e3b2c;
-    --board-deep: #092a1f;
-    --panel: #14493a;
-    --chalk: #f4f0e1;
-    --dim: #a3c2b3;
-    --rule: rgba(244, 240, 225, .22);
-    --bulb: #ffc83a;
-    --foul: #ff7a66;
-    --t0: #b9cfc4; --t1: #8fe0b0; --t2: #6fd3e6; --t3: #ffa95c; --t4: #ffc83a;
-    --display: "Graduate", "Rockwell", "Courier New", serif;
-    --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
-    --label: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+    --ink: #f3f6ff;
+    --dim: #aab5d8;
+    --glass: rgba(8, 12, 32, .78);
+    --line: rgba(255, 255, 255, .16);
+    --go: #ff5a3c;
+    --bad: #ff6b6b;
+    --t0: #ffb347; --t1: #6dffa8; --t2: #5fd4ff; --t3: #c48bff; --t4: #ffd84a;
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   }
-  html, body { height: 100%; }
-  body {
-    background: var(--board-deep); color: var(--chalk);
-    font: 400 17px/1.45 var(--body);
+  html { box-sizing: border-box; height: 100%; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body { height: 100%; margin: 0; overflow: hidden; background: #0b1430; color: var(--ink); font: 400 16px/1.45 var(--body); }
+  #sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #ui {
+    position: relative; height: 100%; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
-    padding-block: 20px 28px;
+    padding-block: 14px 16px; pointer-events: none;
   }
-  .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-  .label { font: 600 13px/1 var(--label); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  #ui > * { pointer-events: auto; }
   button { font: inherit; color: inherit; cursor: pointer; }
-  :focus-visible { outline: 3px solid var(--bulb); outline-offset: 3px; }
+  :focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .label { font: 600 12px/1.2 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 
-  /* masthead + line score */
-  .mast { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .mast h1 { font: 400 26px/1 var(--display); letter-spacing: .04em; margin: 0; }
-  .mast h1 span { color: var(--bulb); }
-  .line { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, 1.5fr); border: 2px solid var(--chalk); background: var(--board); }
-  .line > div { text-align: center; padding: 6px 0 8px; border-left: 1px solid var(--rule); min-width: 0; }
-  .line > div:first-child { border-left: 0; }
-  .line .inn { font: 600 12px/1 var(--label); letter-spacing: .1em; color: var(--dim); }
-  .line .run { font: 400 20px/1.2 var(--display); font-variant-numeric: tabular-nums; min-height: 24px; }
-  .line .now { background: var(--panel); }
-  .line .now .inn { color: var(--bulb); }
-  .line .tot { border-left: 2px solid var(--chalk); }
-  .line .tot .run { color: var(--bulb); }
+  .hud { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .glass { background: var(--glass); border: 1px solid var(--line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .alt { border-radius: 14px; padding: 9px 14px 10px; min-width: 0; }
+  .alt .num { display: flex; align-items: baseline; gap: 6px; }
+  .alt b { font: 700 clamp(26px, 7vw, 36px)/1 var(--mono); font-variant-numeric: tabular-nums; }
+  .alt .unit { font: 600 15px var(--mono); color: var(--dim); }
+  .alt .zone { margin-top: 4px; }
+  .right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .pips { display: flex; gap: 6px; padding: 8px 10px; border-radius: 999px; }
+  .pip { width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .35); }
+  .pip.now { border-color: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .18); }
+  .pip.miss { border-color: var(--bad); }
+  .chip { border-radius: 999px; padding: 6px 12px; font: 600 12px/1 var(--body); letter-spacing: .06em; }
 
-  .card { background: var(--board); border: 2px solid var(--chalk); padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 16px; }
-  .card h2 { font: 400 clamp(24px, 6.2vw, 34px)/1.15 var(--display); margin: 0; text-wrap: balance; }
-  .card p { margin: 0; max-width: 60ch; }
-  .muted { color: var(--dim); }
-
-  .btn { align-self: flex-start; background: var(--bulb); color: #1d1600; border: 0; padding: 13px 22px; font: 400 18px/1 var(--display); letter-spacing: .05em; }
-  .btn:hover { filter: brightness(1.08); }
-  .btn kbd { font: 600 12px/1 var(--label); letter-spacing: .1em; opacity: .7; margin-left: 10px; }
-
-  /* at-bat */
-  .clock { display: flex; align-items: center; gap: 12px; }
-  .clock .bar { flex: 1; height: 10px; background: var(--board-deep); border: 1px solid var(--rule); }
-  .clock .fill { height: 100%; width: 100%; background: var(--bulb); transform-origin: left; }
-  .clock .fill.low { background: var(--foul); }
-  .clock .secs { font: 400 22px/1 var(--display); width: 2.2ch; text-align: right; font-variant-numeric: tabular-nums; }
-  form { display: flex; gap: 10px; flex-wrap: wrap; }
-  input[type=text] {
-    flex: 1 1 220px; min-width: 0; background: var(--board-deep); color: var(--chalk);
-    border: 2px solid var(--chalk); border-radius: 0; padding: 12px 14px; font: 500 20px/1.2 var(--body);
+  .toast {
+    position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 96px); transform: translateX(-50%);
+    border-radius: 14px; padding: 10px 18px 11px; text-align: center; width: max-content; max-width: min(88vw, 420px);
+    pointer-events: none; animation: toast 1.9s ease both;
   }
-  input[type=text]::placeholder { color: var(--dim); opacity: .7; }
+  .toast b { display: block; font: 800 19px/1.2 var(--display); }
+  .toast span { font-size: 14px; color: var(--dim); }
+  @keyframes toast { 0% { opacity: 0; transform: translate(-50%, -10px) scale(.96); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1); } 82% { opacity: 1; } 100% { opacity: 0; } }
+
+  .panel {
+    align-self: center; width: 100%; max-width: 560px; max-height: 54vh; overflow: auto;
+    border-radius: 20px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .panel h2 { font: 800 clamp(23px, 5.6vw, 30px)/1.12 var(--display); margin: 0; text-wrap: balance; }
+  .panel p { margin: 0; }
+  .muted { color: var(--dim); }
+  .title { font: 800 clamp(40px, 11vw, 60px)/.95 var(--display); margin: 0; letter-spacing: -.02em; }
+  .title span { color: var(--t4); }
+
+  .btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; background: var(--go); color: #fff; border: 0; border-radius: 12px; padding: 13px 20px; font: 800 18px/1 var(--display); letter-spacing: .02em; box-shadow: 0 6px 22px rgba(255, 90, 60, .35); }
+  .btn:hover { filter: brightness(1.08); }
+  .btn kbd { font: 600 11px/1 var(--body); letter-spacing: .1em; opacity: .75; }
+
+  .legend { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .legend div { border-radius: 10px; padding: 8px 4px; text-align: center; background: rgba(255, 255, 255, .06); min-width: 0; }
+  .legend b { display: block; font: 700 15px/1.1 var(--mono); }
+  .legend span { font: 600 10.5px/1.2 var(--body); color: var(--dim); white-space: nowrap; }
+
+  .fuel { display: flex; align-items: center; gap: 10px; }
+  .tank { flex: 1; height: 10px; border-radius: 99px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+  .tank i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ffb347, #ff5a3c); transform-origin: left; }
+  .tank i.low { background: var(--bad); }
+  .secs { font: 700 20px/1 var(--mono); width: 2.2ch; text-align: right; font-variant-numeric: tabular-nums; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; margin: 0; }
+  input[type=text] {
+    flex: 1 1 200px; min-width: 0; background: rgba(0, 0, 0, .35); color: var(--ink);
+    border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; font: 500 19px/1.2 var(--body);
+  }
+  input[type=text]:focus { border-color: #fff; outline: none; }
+  input[type=text]::placeholder { color: var(--dim); opacity: .75; }
   .shake { animation: shake .3s; }
   @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-  .note { min-height: 1.45em; color: var(--foul); font-weight: 500; }
+  .note { min-height: 1.45em; color: var(--bad); font-weight: 500; }
 
-  /* result */
-  .call { font: 400 clamp(26px, 7vw, 40px)/1.1 var(--display); margin: 0; }
-  .pts { font: 400 22px/1 var(--display); font-variant-numeric: tabular-nums; }
-  .t0 { color: var(--t0); } .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .out { color: var(--foul); }
-  .answer { font-size: 22px; font-weight: 600; text-transform: capitalize; }
-  .tiers { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
-  .tiers dt { font: 600 13px/1.5 var(--label); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-  .tiers dd { margin: 0; text-transform: capitalize; color: var(--chalk); overflow-wrap: anywhere; }
-  .tiers dd b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--bulb); text-underline-offset: 3px; }
+  .count { font: 800 88px/1 var(--display); text-align: center; }
+  .call { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .call strong { font: 800 clamp(28px, 8vw, 40px)/1 var(--display); letter-spacing: .01em; }
+  .call em { font: 700 22px/1 var(--mono); font-style: normal; }
+  .t0 { color: var(--t0); } .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .out { color: var(--bad); }
+  .answer { font-size: 21px; font-weight: 600; text-transform: capitalize; }
+  .cap { text-transform: capitalize; }
+  .tiers { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; border-top: 1px solid var(--line); padding-top: 12px; margin: 0; font-size: 15px; }
+  .tiers dt { font: 600 12px/1.6 var(--body); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .tiers dd { margin: 0; text-transform: capitalize; overflow-wrap: anywhere; }
+  .tiers dd b { text-decoration: underline; text-underline-offset: 3px; }
 
-  /* box score */
-  .box { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 14px; align-items: baseline; border-top: 1px solid var(--rule); padding-top: 14px; }
-  .box .q { color: var(--dim); font-size: 15px; }
+  .box { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: baseline; border-top: 1px solid var(--line); padding-top: 12px; }
   .box .a { text-transform: capitalize; font-weight: 500; overflow-wrap: anywhere; }
-  .box .n { font: 600 13px/1 var(--label); color: var(--dim); }
-  .box .p { font: 400 17px/1 var(--display); font-variant-numeric: tabular-nums; text-align: right; }
-  .stats { display: flex; gap: 26px; flex-wrap: wrap; }
-  .stats div { display: flex; flex-direction: column; gap: 6px; }
-  .stats b { font: 400 24px/1 var(--display); font-variant-numeric: tabular-nums; }
-  .how { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; }
-  .how dt { font: 400 17px/1.45 var(--display); font-variant-numeric: tabular-nums; text-align: right; }
-  .how dd { margin: 0; }
-  @media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+  .box .q { color: var(--dim); font-size: 14px; }
+  .box .p { font: 700 16px/1 var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 22px; flex-wrap: wrap; }
+  .stats div { display: flex; flex-direction: column; gap: 4px; }
+  .stats b { font: 700 20px/1 var(--mono); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) { .shake, .toast { animation-duration: .01s; } }
 </style>
 
-<div class="wrap">
-  <header class="mast">
-    <h1>LEFT <span>FIELD</span></h1>
-    <div class="label" id="gameNo">7 innings · rarer answers go further</div>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div id="ui">
+  <header class="hud">
+    <div class="alt glass">
+      <div class="label">Altitude</div>
+      <div class="num"><b id="alt">0.00</b><span class="unit">km</span></div>
+      <div class="label zone" id="zone">On the launch pad</div>
+    </div>
+    <div class="right">
+      <div class="pips glass" id="pips" aria-label="Rounds"></div>
+      <button class="chip glass" id="mute" type="button" aria-pressed="false">Sound on</button>
+    </div>
   </header>
-  <div class="line" id="line" aria-label="Line score"></div>
-  <main id="stage"></main>
+  <main class="panel glass" id="panel" aria-live="polite"></main>
 </div>
 
 <script src="data.js"></script>
 <script src="match.js"></script>
 <script>
 (function () {
+  "use strict";
   var ROUNDS = 7, SECONDS = 25;
   var TIERS = [
-    { name: "Routine play", pts: 10 },
-    { name: "Base hit", pts: 25 },
-    { name: "Extra bases", pts: 50 },
-    { name: "Off the wall", pts: 75 },
-    { name: "Out of the park", pts: 100 }
+    { name: "Common", km: 10, c: "#ffb347" },
+    { name: "Uncommon", km: 25, c: "#6dffa8" },
+    { name: "Rare", km: 50, c: "#5fd4ff" },
+    { name: "Epic", km: 75, c: "#c48bff" },
+    { name: "Legendary", km: 100, c: "#ffd84a" }
   ];
-  var M = window.LF_match, stage = document.getElementById("stage"), lineEl = document.getElementById("line");
+  var MILES = [
+    { km: 0.83, name: "Burj Khalifa", line: "Higher than the world's tallest building" },
+    { km: 8.85, name: "Mount Everest", line: "You just cleared the summit of Everest" },
+    { km: 11, name: "Jet cruising height", line: "Waving at the airliners" },
+    { km: 39, name: "Record skydive", line: "Above Felix Baumgartner's 39 km jump" },
+    { km: 50, name: "Top of the stratosphere", line: "The sky is turning black" },
+    { km: 85, name: "Meteor zone", line: "Where shooting stars burn up" },
+    { km: 100, name: "Kármán line", line: "You are officially in space" },
+    { km: 408, name: "International Space Station", line: "Level with the ISS" },
+    { km: 515, name: "Hubble Space Telescope", line: "Passing Hubble" },
+    { km: 700, name: "Perfect flight", line: "700 km. Nobody flies higher" }
+  ];
+  var MOON = 384400;
+  var M = window.LF_match;
+  function $(id) { return document.getElementById(id); }
+  var panel = $("panel"), altEl = $("alt"), zoneEl = $("zone"), pipsEl = $("pips"), muteBtn = $("mute");
 
   /* ---------- storage (optional; the game works without it) ---------- */
-  function load() { try { return JSON.parse(localStorage.getItem("leftfield") || "{}") || {}; } catch (e) { return {}; } }
-  function save() { try { localStorage.setItem("leftfield", JSON.stringify(store)); } catch (e) {} }
-  var store = load();
-  store.games = store.games || 0; store.best = store.best || 0; store.total = store.total || 0; store.deck = store.deck || [];
+  var store = (function () { try { return JSON.parse(localStorage.getItem("rareair") || "{}") || {}; } catch (e) { return {}; } })();
+  ["games", "best", "total", "km"].forEach(function (k) { store[k] = store[k] || 0; });
+  store.deck = store.deck || [];
+  function save() { try { localStorage.setItem("rareair", JSON.stringify(store)); } catch (e) {} }
 
   /* ---------- prompts ---------- */
   function makePrompt(id, group, text, pool, compiled) {
@@ -147,8 +186,7 @@
   var byId = {}; base.forEach(function (p) { byId[p.id] = p; });
   function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function tierOf(p, a) { return Math.max(0, a.tier - p.shift); }
-
-  /* Five categories dealt from a deck that only reshuffles once every category has come up, plus two letter twists. */
+  /* Five categories from a deck that only reshuffles once every category has come up, plus two letter twists. */
   function deal() {
     var picks = [], groups = {}, held = [], guard = 0;
     while (picks.length < 5 && guard++ < 500) {
@@ -168,82 +206,422 @@
     return shuffle(picks);
   }
 
-  /* ---------- rendering helpers ---------- */
+  /* ---------- sound (Web Audio, synthesised; starts after the first click) ---------- */
+  var AC = null, noise = null, muted = !!store.muted;
+  function audio() {
+    if (muted) return null;
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (AC.state === "suspended") AC.resume();
+    if (!noise) {
+      noise = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
+      var d = noise.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return AC;
+  }
+  function tone(f, at, dur, type, vol) {
+    var a = audio(); if (!a) return;
+    var t = a.currentTime + (at || 0), o = a.createOscillator(), g = a.createGain();
+    o.type = type || "sine"; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function roar(dur, peak, vol) {
+    var a = audio(); if (!a) return;
+    var t = a.currentTime, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    s.buffer = noise; s.loop = true; f.type = "lowpass";
+    f.frequency.setValueAtTime(250, t); f.frequency.exponentialRampToValueAtTime(peak, t + dur * 0.3); f.frequency.exponentialRampToValueAtTime(180, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(a.destination); s.start(t); s.stop(t + dur + 0.05);
+  }
+  var NOTES = [523, 659, 784, 1047, 1319];
+  function sfxBoost(tier) { roar(1.6 + tier * 0.3, 900 + tier * 450, 0.35 + tier * 0.05); for (var i = 0; i <= tier; i++) tone(NOTES[i], 0.04 + i * 0.09, 0.3, "triangle", 0.11); }
+  function sfxFoul() { tone(150, 0, 0.16, "square", 0.06); tone(110, 0.11, 0.2, "square", 0.06); }
+  function sfxStall() { roar(0.7, 400, 0.15); tone(196, 0, 0.3, "sawtooth", 0.05); tone(147, 0.2, 0.45, "sawtooth", 0.05); }
+  function sfxTick(last) { tone(last ? 1320 : 880, 0, 0.06, "square", 0.04); }
+  function drawMute() { muteBtn.textContent = muted ? "Sound off" : "Sound on"; muteBtn.setAttribute("aria-pressed", String(muted)); }
+  muteBtn.onclick = function () { muted = !muted; store.muted = muted; save(); drawMute(); if (!muted) tone(784, 0, 0.12, "triangle", 0.08); };
+  drawMute();
+
+  /* ---------- the sky ---------- */
+  var cv = $("sky"), ctx = cv.getContext("2d"), W = 0, H = 0, S = 1;
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function resize() {
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; S = Math.max(0.7, Math.min(1.15, H / 820));
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener("resize", resize); resize();
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
+  /* world height in px for an altitude: squashed so the low sky and orbit both get screen time */
+  function F(km) { return 260 * Math.pow(Math.max(0, km), 0.6); }
+  var SKY = [[0, [92, 172, 236], [206, 236, 255]], [10, [42, 110, 202], [134, 196, 240]], [30, [24, 58, 140], [72, 118, 196]],
+             [60, [14, 26, 78], [40, 60, 124]], [100, [4, 6, 18], [14, 22, 56]], [1e9, [4, 6, 18], [14, 22, 56]]];
+  function skyAt(a) {
+    for (var i = 0; i < SKY.length - 1; i++) if (a <= SKY[i + 1][0]) {
+      var t = (a - SKY[i][0]) / (SKY[i + 1][0] - SKY[i][0]);
+      return [0, 1].map(function (k) { var x = SKY[i][1 + k], y = SKY[i + 1][1 + k]; return "rgb(" + Math.round(lerp(x[0], y[0], t)) + "," + Math.round(lerp(x[1], y[1], t)) + "," + Math.round(lerp(x[2], y[2], t)) + ")"; });
+    }
+  }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  var stars = [], clouds = [], sats = [], mtn = [], lines = [], i;
+  for (i = 0; i < 260; i++) stars.push({ x: Math.random(), y: Math.random(), r: rnd(0.4, 1.6), tw: rnd(0, 6.3) });
+  for (i = 0; i < 46; i++) clouds.push({ km: rnd(0.6, 13), x: rnd(-0.15, 1.15), w: rnd(50, 150), a: rnd(0.65, 0.95) });
+  for (i = 0; i < 16; i++) sats.push({ km: rnd(150, 690), x: Math.random(), v: rnd(-0.02, 0.02) });
+  for (i = 0; i <= 24; i++) mtn.push(rnd(0.25, 1) * (i % 2 ? 0.55 : 1));
+  for (i = 0; i < 36; i++) lines.push({ x: Math.random(), y: Math.random(), l: rnd(0.4, 1) });
+
+  var alt = 0, fly = null, thrust = 0, thrustTarget = 0, idle = 0, flameColor = TIERS[0].c, shake = 0, flash = 0, flashColor = "#ffffff";
+  var parts = [], floats = [], lastT = 0, lastCam = 0, lineOff = 0, tracking = false, mIdx = 0, toastQ = [], toastBusy = false;
+  function flyTo(to, dur, boost, cb) { fly = { from: alt, to: to, t0: performance.now(), dur: dur, boost: boost, cb: cb }; }
+  function ease(p) { return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+
+  function geometry() {
+    var rh = 96 * S;
+    return { cx: W / 2, baseY: Math.round(H * 0.28 + rh), rh: rh, rw: 30 * S };
+  }
+  function emit(g, n, kind, col) {
+    for (var k = 0; k < n && parts.length < 700; k++) {
+      var p = { x: g.cx + rnd(-0.22, 0.22) * g.rw, y: g.baseY + 4, vx: rnd(-35, 35), vy: rnd(110, 260) * (0.5 + thrust), life: 0, max: rnd(0.35, 0.8), r: rnd(3, 7) * S, kind: kind, c: col || flameColor };
+      if (kind === "s") { p.vy = rnd(30, 110); p.vx = rnd(-60, 60); p.max = rnd(0.8, 1.6); p.r = rnd(6, 12) * S; }
+      if (kind === "g") { p.y = g.baseY + F(alt) - 2; p.vx = rnd(120, 320) * (Math.random() < 0.5 ? -1 : 1); p.vy = rnd(-40, -5); p.max = rnd(0.8, 1.6); p.r = rnd(8, 16) * S; p.kind = "s"; }
+      if (kind === "k") { var ang = rnd(0, 6.3), sp = rnd(120, 420); p.x = g.cx; p.y = g.baseY - g.rh * 0.5; p.vx = Math.cos(ang) * sp; p.vy = Math.sin(ang) * sp; p.max = rnd(0.6, 1.2); p.r = rnd(2, 4) * S; p.c = "hsl(" + Math.round(rnd(0, 360)) + ",95%,65%)"; }
+      parts.push(p);
+    }
+  }
+
+  function drawRocket(g, tilt) {
+    var h = g.rh, w = g.rw;
+    ctx.save(); ctx.translate(g.cx, g.baseY); ctx.rotate(tilt);
+    ctx.fillStyle = "#e8402a";
+    [-1, 1].forEach(function (s) {
+      ctx.beginPath(); ctx.moveTo(s * w / 2, -h * 0.38); ctx.lineTo(s * w * 1.05, -h * 0.08); ctx.lineTo(s * w * 1.02, h * 0.02); ctx.lineTo(s * w / 2, -h * 0.12); ctx.closePath(); ctx.fill();
+    });
+    ctx.fillStyle = "#596178";
+    ctx.beginPath(); ctx.moveTo(-w * 0.3, -h * 0.1); ctx.lineTo(w * 0.3, -h * 0.1); ctx.lineTo(w * 0.4, 0); ctx.lineTo(-w * 0.4, 0); ctx.closePath(); ctx.fill();
+    var gr = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+    gr.addColorStop(0, "#c3cce2"); gr.addColorStop(0.45, "#ffffff"); gr.addColorStop(1, "#a3aec8");
+    ctx.fillStyle = gr;
+    ctx.beginPath(); ctx.moveTo(-w / 2, -h * 0.1); ctx.lineTo(-w / 2, -h * 0.62);
+    ctx.quadraticCurveTo(-w / 2, -h * 0.9, 0, -h); ctx.quadraticCurveTo(w / 2, -h * 0.9, w / 2, -h * 0.62);
+    ctx.lineTo(w / 2, -h * 0.1); ctx.closePath(); ctx.fill();
+    ctx.save(); ctx.clip(); ctx.fillStyle = "#e8402a"; ctx.fillRect(-w, -h, w * 2, h * 0.24); ctx.fillRect(-w, -h * 0.3, w * 2, h * 0.06); ctx.restore();
+    ctx.beginPath(); ctx.arc(0, -h * 0.55, w * 0.25, 0, 7); ctx.fillStyle = "#1d3b73"; ctx.fill(); ctx.lineWidth = 3 * S; ctx.strokeStyle = "#8fa0c4"; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-w * 0.08, -h * 0.58, w * 0.08, 0, 7); ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.fill();
+    ctx.fillStyle = "#b52f1e"; ctx.fillRect(-w * 0.06, -h * 0.3, w * 0.12, h * 0.25);
+    ctx.restore();
+  }
+  function drawFlame(g, now) {
+    if (thrust < 0.03) return;
+    var len = (26 + 150 * thrust) * S * (0.88 + 0.24 * Math.sin(now / 37)), w = 17 * S * (0.6 + thrust * 0.6), y = g.baseY;
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    var r = ctx.createRadialGradient(g.cx, y + 12 * S, 0, g.cx, y + 12 * S, 90 * S * (0.4 + thrust));
+    r.addColorStop(0, rgba(flameColor, 0.5 * thrust)); r.addColorStop(1, rgba(flameColor, 0));
+    ctx.fillStyle = r; ctx.fillRect(g.cx - 140 * S, y - 120 * S, 280 * S, 300 * S);
+    var lg = ctx.createLinearGradient(0, y, 0, y + len);
+    lg.addColorStop(0, "rgba(255,255,255,.95)"); lg.addColorStop(0.28, flameColor); lg.addColorStop(1, rgba(flameColor, 0));
+    ctx.fillStyle = lg;
+    ctx.beginPath(); ctx.moveTo(g.cx - w / 2, y); ctx.quadraticCurveTo(g.cx - w * 0.7, y + len * 0.45, g.cx, y + len); ctx.quadraticCurveTo(g.cx + w * 0.7, y + len * 0.45, g.cx + w / 2, y); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function cloud(x, y, w, a) {
+    ctx.fillStyle = "rgba(255,255,255," + a + ")";
+    ctx.beginPath(); ctx.ellipse(x, y, w * 0.5, w * 0.16, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x - w * 0.18, y - w * 0.1, w * 0.2, w * 0.15, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + w * 0.12, y - w * 0.13, w * 0.24, w * 0.19, 0, 0, 7); ctx.fill();
+  }
+  function plane(x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(S, S);
+    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(-240, 4); ctx.stroke();
+    ctx.fillStyle = "#f4f6fb";
+    ctx.beginPath(); ctx.ellipse(0, 0, 24, 4.5, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(-8, 15); ctx.lineTo(-13, 15); ctx.lineTo(-6, 0); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-17, -2); ctx.lineTo(-24, -12); ctx.lineTo(-27, -12); ctx.lineTo(-24, 0); ctx.fill();
+    ctx.restore();
+  }
+  function balloon(x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(S, S);
+    ctx.fillStyle = "rgba(240,244,255,.92)"; ctx.beginPath(); ctx.ellipse(0, -44, 20, 26, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = "rgba(240,244,255,.7)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(0, -4); ctx.stroke();
+    ctx.fillStyle = "#c9d1e6"; ctx.fillRect(-5, -4, 10, 8);
+    ctx.restore();
+  }
+  function sat(x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.fillStyle = "#2c5bb8"; ctx.fillRect(-20, -3, 13, 6); ctx.fillRect(7, -3, 13, 6);
+    ctx.fillStyle = "#d6a640"; ctx.fillRect(-6, -5, 12, 10);
+    ctx.restore();
+  }
+  function iss(x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(S, S);
+    ctx.fillStyle = "#cfd6e4"; ctx.fillRect(-64, -2, 128, 4);
+    [-54, -36, 36, 54].forEach(function (px) { ctx.fillStyle = "#c79a2e"; ctx.fillRect(px - 7, -28, 14, 24); ctx.fillRect(px - 7, 4, 14, 24); });
+    ctx.fillStyle = "#eef1f7"; ctx.fillRect(-20, -6, 40, 12); ctx.fillRect(-5, -18, 10, 36);
+    ctx.restore();
+  }
+  function hubble(x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(S, S); ctx.rotate(-0.2);
+    ctx.fillStyle = "#2a4f9c"; ctx.fillRect(-14, -38, 12, 26); ctx.fillRect(-14, 12, 12, 26);
+    var g = ctx.createLinearGradient(0, -10, 0, 10); g.addColorStop(0, "#f2f4f8"); g.addColorStop(1, "#9aa3b8");
+    ctx.fillStyle = g; ctx.fillRect(-30, -10, 58, 20); ctx.fillStyle = "#3a3f4c"; ctx.fillRect(28, -10, 6, 20);
+    ctx.restore();
+  }
+  function label(text, x, y, align, color) {
+    ctx.font = "600 " + Math.round(11 * Math.max(1, S)) + "px Inter, Arial, sans-serif"; ctx.textAlign = align || "center";
+    ctx.fillStyle = color || "rgba(255,255,255,.8)"; ctx.fillText(text, x, y);
+  }
+
+  function frame(now) {
+    var dt = Math.min(0.05, ((now - (lastT || now)) / 1000) || 0.016); lastT = now;
+    if (fly) {
+      var p = clamp((now - fly.t0) / fly.dur, 0, 1);
+      alt = lerp(fly.from, fly.to, ease(p));
+      if (fly.boost) thrustTarget = p < 0.72 ? 1 : idle;
+      if (p >= 1) { var cb = fly.cb; alt = fly.to; fly = null; thrustTarget = idle; if (cb) cb(); }
+    }
+    thrust += (thrustTarget - thrust) * Math.min(1, dt * 7);
+    var g = geometry(), cam = F(alt), dCam = cam - lastCam; lastCam = cam;
+    if (Math.abs(dCam) > 2000) dCam = 0;
+    var speed = Math.abs(dCam) / dt;
+    if (tracking) while (mIdx < MILES.length && alt >= MILES[mIdx].km - 1e-6) { toastQ.push(MILES[mIdx]); mIdx++; }
+    if (!toastBusy && toastQ.length) { showToast(toastQ[toastQ.length - 1]); toastQ = []; }
+    function Y(km) { return g.baseY - (F(km) - cam); }
+
+    /* sky */
+    var sk = skyAt(alt), bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, sk[0]); bg.addColorStop(1, sk[1]); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    var sa = clamp((alt - 18) / 60, 0, 1);
+    if (sa > 0) {
+      ctx.fillStyle = "#fff";
+      stars.forEach(function (s) {
+        var y = ((s.y * H + cam * 0.04) % H + H) % H;
+        ctx.globalAlpha = sa * (0.55 + 0.45 * Math.sin(now / 700 + s.tw)); ctx.fillRect(s.x * W, y, s.r, s.r);
+      });
+      var mr = (22 + alt * 0.03) * S, mx = W * 0.78, my = H * 0.17;
+      ctx.globalAlpha = sa; ctx.fillStyle = "#e9e6dc"; ctx.beginPath(); ctx.arc(mx, my, mr, 0, 7); ctx.fill();
+      ctx.fillStyle = "rgba(160,156,146,.55)";
+      [[-0.3, -0.2, 0.22], [0.25, 0.15, 0.16], [-0.05, 0.38, 0.12], [0.35, -0.35, 0.1]].forEach(function (c) { ctx.beginPath(); ctx.arc(mx + c[0] * mr, my + c[1] * mr, c[2] * mr, 0, 7); ctx.fill(); });
+      ctx.globalAlpha = 1;
+    }
+    var la = clamp((alt - 25) / 60, 0, 1);
+    if (la > 0) {
+      var R = Math.max(W, H) * 2.4, lh = H * (0.1 + 0.16 * clamp((alt - 60) / 640, 0, 1)), cy = H + R - lh;
+      ctx.globalAlpha = la;
+      ctx.strokeStyle = "rgba(120,190,255,.16)"; ctx.lineWidth = 40; ctx.beginPath(); ctx.arc(W / 2, cy, R + 14, 0, 7); ctx.stroke();
+      ctx.strokeStyle = "rgba(140,205,255,.45)"; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(W / 2, cy, R + 3, 0, 7); ctx.stroke();
+      var eg = ctx.createLinearGradient(0, H - lh, 0, H); eg.addColorStop(0, "#5aa7ea"); eg.addColorStop(0.35, "#1f5fae"); eg.addColorStop(1, "#0d2f66");
+      ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(W / 2, cy, R, 0, 7); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.35)";
+      for (var k = 0; k < 7; k++) { ctx.beginPath(); ctx.ellipse(((k * 0.19 + now / 90000) % 1.2 - 0.1) * W, H - lh * (0.55 - (k % 3) * 0.12), 70 * S, 9 * S, 0, 0, 7); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+
+    /* the world, which shakes */
+    ctx.save();
+    if (shake > 0.2 && !reduce) ctx.translate(rnd(-shake, shake), rnd(-shake, shake));
+    shake *= Math.pow(0.03, dt);
+    var gy = Y(0);
+    if (gy < H + 200) {
+      ctx.fillStyle = "#7f97c0"; ctx.beginPath(); ctx.moveTo(0, gy);
+      mtn.forEach(function (m, n) { ctx.lineTo(n / (mtn.length - 1) * W, gy - m * 120 * S); }); ctx.lineTo(W, gy); ctx.fill();
+      ctx.fillStyle = "#3c7d4a"; ctx.fillRect(0, gy, W, H - gy + 220);
+      ctx.fillStyle = "#2f6a3d"; ctx.fillRect(0, gy + 22 * S, W, H - gy + 200);
+      ctx.fillStyle = "#6b7280"; ctx.fillRect(g.cx - 80 * S, gy, 160 * S, 12 * S);
+      var tx = g.cx - 44 * S, th = g.rh * 1.18;
+      ctx.strokeStyle = "#c2412c"; ctx.lineWidth = 3 * S; ctx.beginPath();
+      ctx.moveTo(tx - 9 * S, gy); ctx.lineTo(tx - 9 * S, gy - th); ctx.moveTo(tx + 9 * S, gy); ctx.lineTo(tx + 9 * S, gy - th);
+      for (var yy = 0; yy < th - 10; yy += 14 * S) { ctx.moveTo(tx - 9 * S, gy - yy); ctx.lineTo(tx + 9 * S, gy - yy - 14 * S); }
+      ctx.moveTo(tx + 9 * S, gy - g.rh * 0.7); ctx.lineTo(g.cx - g.rw * 0.5, gy - g.rh * 0.7); ctx.stroke();
+    }
+    clouds.forEach(function (c) { var y = Y(c.km); if (y > -80 && y < H + 80) cloud(c.x * W, y, c.w * S, c.km > 8 ? c.a * 0.6 : c.a); });
+    var py = Y(11); if (py > -40 && py < H + 40) plane(((now / 14) % (W + 300)) - 50, py);
+    var by = Y(39); if (by > -60 && by < H + 60) { balloon(W * 0.22, by); label("Record jump · 39 km", W * 0.22, by + 20 * S); }
+    for (var m = 0; m < 5; m++) {
+      var ph = (now / 1700 + m * 0.37) % 1, my2 = Y(78 + m * 4);
+      if (my2 < -100 || my2 > H + 100) continue;
+      var mx2 = (m * 0.21 + 0.08) * W + ph * 120 * S;
+      ctx.strokeStyle = "rgba(255,230,190," + (1 - ph) * 0.9 + ")"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(mx2, my2 + ph * 70 * S); ctx.lineTo(mx2 - 50 * S, my2 + ph * 70 * S - 30 * S); ctx.stroke();
+    }
+    var ky = Y(100);
+    if (ky > -20 && ky < H + 20) {
+      ctx.setLineDash([10, 8]); ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, ky); ctx.lineTo(W, ky); ctx.stroke(); ctx.setLineDash([]);
+      label("KÁRMÁN LINE · 100 KM · SPACE STARTS HERE", W / 2, ky - 8);
+    }
+    var aTop = Y(300), aBot = Y(105);
+    if (aBot > 0 && aTop < H) {
+      var ag = ctx.createLinearGradient(0, aBot, 0, aTop);
+      ag.addColorStop(0, "rgba(80,255,170,0)"); ag.addColorStop(0.15, "rgba(80,255,170,.32)"); ag.addColorStop(0.6, "rgba(150,110,255,.16)"); ag.addColorStop(1, "rgba(150,110,255,0)");
+      ctx.fillStyle = ag;
+      for (var x = 0; x < W; x += 5) {
+        var wv = Math.sin(x / 70 + now / 1300) * 0.5 + Math.sin(x / 23 - now / 800) * 0.3 + 0.2;
+        if (wv <= 0) continue;
+        ctx.globalAlpha = clamp(wv, 0, 1); ctx.fillRect(x, aTop + Math.sin(x / 40 + now / 1000) * 30 * S, 5, aBot - aTop);
+      }
+      ctx.globalAlpha = 1;
+    }
+    sats.forEach(function (s) { var y = Y(s.km); if (y > -30 && y < H + 30) sat(((s.x + now * s.v / 1000) % 1 + 1) % 1 * W, y, S * 0.8); });
+    var iy = Y(408); if (iy > -60 && iy < H + 60) { iss(W * 0.74, iy); label("ISS · 408 km", W * 0.74, iy + 44 * S); }
+    var hy = Y(515); if (hy > -60 && hy < H + 60) { hubble(W * 0.27, hy); label("Hubble · 515 km", W * 0.27, hy + 50 * S); }
+
+    /* speed lines */
+    if (speed > 400 && !reduce) {
+      lineOff += dCam * 1.6;
+      ctx.strokeStyle = "rgba(255,255,255," + clamp((speed - 400) / 3000, 0, 0.35) + ")"; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      lines.forEach(function (l) { var y = ((l.y * H + lineOff) % H + H) % H, len = Math.min(220, speed / 14) * l.l; ctx.moveTo(l.x * W, y); ctx.lineTo(l.x * W, y - len); });
+      ctx.stroke();
+    }
+
+    /* exhaust */
+    if (thrust > 0.05) emit(g, Math.round(thrust * 70 * dt * 6 + Math.random()), "f");
+    if (alt < 0.3 && thrust > 0.2) emit(g, Math.round(thrust * 3), "g");
+    for (var pi = parts.length - 1; pi >= 0; pi--) {
+      var pt = parts[pi]; pt.life += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt + dCam;
+      if (pt.kind === "k") { pt.vx *= 0.97; pt.vy = pt.vy * 0.97 + 60 * dt; }
+      if (pt.life > pt.max || pt.y > H + 60 || pt.y < -200) { parts.splice(pi, 1); continue; }
+      var t = pt.life / pt.max;
+      if (pt.kind === "f" && t < 0.35) { ctx.fillStyle = pt.c; ctx.globalAlpha = 1 - t * 1.5; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, 7); ctx.fill(); }
+      else if (pt.kind === "k") { ctx.fillStyle = pt.c; ctx.globalAlpha = 1 - t; ctx.fillRect(pt.x, pt.y, pt.r, pt.r); }
+      else { ctx.fillStyle = "rgb(205,208,220)"; ctx.globalAlpha = (1 - t) * 0.45; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r * (1 + t * 2.2), 0, 7); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+    drawFlame(g, now);
+    var bob = alt > 0.05 && !fly ? Math.sin(now / 650) * 4 * S : 0;
+    var tilt = alt > 0.05 ? Math.sin(now / 900) * 0.025 + (fly && fly.boost ? Math.sin(now / 90) * 0.01 : 0) : 0;
+    g.baseY += bob; drawRocket(g, tilt);
+    ctx.restore();
+
+    /* +km floats */
+    for (var fi = floats.length - 1; fi >= 0; fi--) {
+      var f = floats[fi]; f.life += dt;
+      if (f.life > 1.8) { floats.splice(fi, 1); continue; }
+      ctx.globalAlpha = clamp(2 - f.life * 1.1, 0, 1);
+      ctx.font = "800 " + Math.round(30 * S) + "px 'Bricolage Grotesque', Arial, sans-serif"; ctx.textAlign = "left"; ctx.fillStyle = f.c;
+      ctx.fillText(f.t, g.cx + g.rw + 22 * S, g.baseY - g.rh * 0.55 - f.life * 50 * S);
+      ctx.globalAlpha = 1;
+    }
+    /* altitude ruler */
+    [1, 5, 10, 20, 50, 100, 200, 300, 400, 500, 600, 700].forEach(function (km) {
+      var y = Y(km); if (y < 90 || y > H - 10) return;
+      ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fillRect(W - 14, y, 10, 1.5); label(km + " km", W - 18, y + 4, "right", "rgba(255,255,255,.6)");
+    });
+    if (flash > 0.01) { ctx.fillStyle = rgba(flashColor, flash); ctx.fillRect(0, 0, W, H); flash *= Math.pow(0.02, dt); }
+
+    var txt = alt < 10 ? alt.toFixed(2) : alt < 100 ? alt.toFixed(1) : String(Math.round(alt));
+    if (altEl.textContent !== txt) altEl.textContent = txt;
+    var z = alt < 0.05 ? "On the launch pad" : alt < 12 ? "Troposphere" : alt < 50 ? "Stratosphere" : alt < 85 ? "Mesosphere" : alt < 100 ? "Thermosphere" : alt < 600 ? "Space · thermosphere" : "Space · exosphere";
+    if (zoneEl.textContent !== z) zoneEl.textContent = z;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  function showToast(m) {
+    toastBusy = true;
+    var el = h("div", { class: "toast glass" }, [h("b", { text: m.name }), h("span", { text: m.line })]);
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); toastBusy = false; }, reduce ? 1200 : 1900);
+  }
+  function boost(km, tier) {
+    var g = geometry();
+    flameColor = TIERS[tier].c; idle = 0.3;
+    flyTo(alt + km, 1700 + tier * 280, true);
+    shake = [3, 5, 7, 10, 14][tier];
+    floats.push({ t: "+" + km + " km", c: TIERS[tier].c, life: 0 });
+    if (tier >= 3) { emit(g, tier === 4 ? 110 : 50, "k"); flash = tier === 4 ? 0.55 : 0.25; flashColor = TIERS[tier].c; }
+    sfxBoost(tier);
+  }
+  function sputter() { emit(geometry(), 14, "s"); shake = 3; thrust = 0.05; sfxFoul(); }
+  function stall() { emit(geometry(), 30, "s"); thrustTarget = 0; idle = 0; shake = 4; sfxStall(); }
+
+  /* ---------- screens ---------- */
   function h(tag, attrs, kids) {
     var el = document.createElement(tag);
-    for (var k in (attrs || {})) { if (k === "text") el.textContent = attrs[k]; else if (k === "html") el.innerHTML = attrs[k]; else el.setAttribute(k, attrs[k]); }
+    for (var k in (attrs || {})) { if (k === "text") el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); }
     (kids || []).forEach(function (c) { if (c) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
     return el;
   }
-  function show(nodes) { stage.replaceChildren(h("section", { class: "card" }, nodes)); }
+  function show(nodes) { panel.replaceChildren.apply(panel, nodes.filter(Boolean)); panel.scrollTop = 0; }
+  function btn(id, text, fn) {
+    var b = h("button", { class: "btn", id: id, type: "button" }, [text, h("kbd", { text: "ENTER" })]);
+    b.onclick = fn; onEnter = fn; return b;
+  }
   var game = null, timer = null, onEnter = null;
 
-  function drawLine() {
-    lineEl.replaceChildren();
-    var total = 0;
-    for (var i = 0; i < ROUNDS; i++) {
-      var r = game && game.results[i];
-      if (r) total += r.pts;
-      var cell = h("div", { class: game && game.i === i && !game.done ? "now" : "" }, [
-        h("div", { class: "inn", text: String(i + 1) }),
-        h("div", { class: "run " + (r ? (r.pts ? "t" + r.tier : "out") : ""), text: r ? String(r.pts) : "" })
-      ]);
-      lineEl.appendChild(cell);
+  function drawPips() {
+    pipsEl.replaceChildren();
+    for (var n = 0; n < ROUNDS; n++) {
+      var r = game && game.results[n], el = h("span", { class: "pip" });
+      if (r && r.pts) { el.style.background = TIERS[r.tier].c; el.style.borderColor = TIERS[r.tier].c; }
+      else if (r) el.classList.add("miss");
+      else if (game && !game.done && game.i === n) el.classList.add("now");
+      pipsEl.appendChild(el);
     }
-    lineEl.appendChild(h("div", { class: "tot" }, [h("div", { class: "inn", text: "TOTAL" }), h("div", { class: "run", text: game ? String(total) : "" })]));
-    return total;
-  }
-
-  /* ---------- screens ---------- */
-  function home() {
-    game = null; drawLine();
-    var how = h("dl", { class: "how" });
-    TIERS.forEach(function (t, i) {
-      how.appendChild(h("dt", { class: "t" + i, text: String(t.pts) }));
-      how.appendChild(h("dd", null, [h("span", { class: "t" + i, text: t.name })]));
-    });
-    var btn = h("button", { class: "btn", id: "play", type: "button" }, ["PLAY BALL", h("kbd", { text: "ENTER" })]);
-    btn.onclick = start; onEnter = start;
-    show([
-      h("h2", { text: "Name something nobody else would." }),
-      h("p", { text: "Seven prompts, " + SECONDS + " seconds each. Any answer on the list scores, and the less obvious it is, the more it's worth. Spelling doesn't have to be perfect: close is read as what you meant." }),
-      how,
-      btn,
-      store.games ? statsRow() : h("p", { class: "muted", text: "Out of 700. Play as many games as you like; every game deals seven fresh prompts." })
-    ]);
-    btn.focus();
   }
   function statsRow() {
-    function stat(label, value) { return h("div", null, [h("span", { class: "label", text: label }), h("b", { text: String(value) })]); }
-    return h("div", { class: "stats" }, [stat("Games", store.games), stat("Best", store.best), stat("Average", Math.round(store.total / store.games))]);
+    function stat(l, v) { return h("div", null, [h("span", { class: "label", text: l }), h("b", { text: String(v) })]); }
+    var pct = store.km / MOON * 100;
+    return h("div", { class: "stats" }, [
+      stat("Flights", store.games), stat("Best", store.best + " km"),
+      stat("Lifetime", store.km.toLocaleString() + " km"), stat("To the Moon", (pct < 10 ? pct.toFixed(2) : pct.toFixed(1)) + "%")
+    ]);
   }
 
-  function start() {
+  function home() {
+    drawPips();
+    var legend = h("div", { class: "legend" });
+    TIERS.forEach(function (t, n) { legend.appendChild(h("div", null, [h("b", { class: "t" + n, text: "+" + t.km }), h("span", { text: t.name })])); });
+    var b = btn("play", "LAUNCH", function () { audio(); countdown(); });
+    show([
+      h("h1", { class: "title" }, ["RARE ", h("span", { text: "AIR" })]),
+      h("p", { text: "Seven prompts, " + SECONDS + " seconds each. Every answer on the list fires the engine, and the less obvious it is, the higher you fly. Typos are fine: close counts." }),
+      legend, b,
+      store.games ? statsRow() : h("p", { class: "muted", text: "Clear 100 km to reach space. A perfect flight is 700 km, past Hubble." })
+    ]);
+    b.focus();
+  }
+
+  function countdown() {
     game = { prompts: deal(), results: [], i: 0, done: false };
-    document.getElementById("gameNo").textContent = "Game " + (store.games + 1);
-    atBat();
+    mIdx = 0; toastQ = []; tracking = true; drawPips();
+    var n = 3, done = false, cd = h("div", { class: "count", text: "3" }), iv;
+    function go() { if (done) return; done = true; clearInterval(iv); atBat(); }
+    onEnter = go;
+    show([h("div", { class: "label", text: "Flight " + (store.games + 1) + " · ignition sequence" }), cd, h("p", { class: "muted", text: "Press Enter to skip." })]);
+    thrustTarget = idle = 0.25; flameColor = TIERS[0].c; tone(440, 0, 0.12, "square", 0.05);
+    iv = setInterval(function () {
+      n--;
+      if (n > 0) { cd.textContent = String(n); tone(440, 0, 0.12, "square", 0.05); }
+      else { clearInterval(iv); cd.textContent = "GO"; tone(880, 0, 0.2, "square", 0.06); setTimeout(go, 350); }
+    }, 650);
   }
 
   function atBat() {
-    var p = game.prompts[game.i]; drawLine(); onEnter = null;
-    var fill = h("div", { class: "fill" }), secs = h("div", { class: "secs", text: String(SECONDS) });
+    var p = game.prompts[game.i]; drawPips(); onEnter = null;
+    thrustTarget = idle = alt > 0.05 ? 0.3 : 0.25;
+    var fill = h("i"), secs = h("div", { class: "secs", text: String(SECONDS) });
     var input = h("input", { type: "text", id: "answer", autocomplete: "off", autocapitalize: "off", autocorrect: "off", spellcheck: "false", placeholder: "Type an answer", "aria-label": p.text, enterkeyhint: "go" });
     var note = h("div", { class: "note", role: "status" });
-    var form = h("form", null, [input, h("button", { class: "btn", type: "submit", text: "SWING" })]);
+    var form = h("form", null, [input, h("button", { class: "btn", type: "submit", text: "FIRE" })]);
     show([
-      h("div", { class: "label", text: "Inning " + (game.i + 1) + " of " + ROUNDS }),
+      h("div", { class: "label", text: "Stage " + (game.i + 1) + " of " + ROUNDS }),
       h("h2", { text: p.text }),
-      h("div", { class: "clock" }, [h("div", { class: "bar" }, [fill]), secs]),
+      h("div", { class: "fuel" }, [h("span", { class: "label", text: "Fuel" }), h("div", { class: "tank" }, [fill]), secs]),
       form, note
     ]);
     input.focus();
-    var t0 = performance.now(), tries = [];
+    var t0 = performance.now(), lastSec = SECONDS, over = false;
     function tick() {
+      if (over) return;
       var left = SECONDS - (performance.now() - t0) / 1000;
-      if (left <= 0) { finish(input.value.trim() ? swing(true) : null, input.value.trim()); return; }
+      if (left <= 0) { var typed = input.value.trim(); finish(typed ? swing(true) : null, typed); return; }
       fill.style.transform = "scaleX(" + (left / SECONDS) + ")";
       fill.classList.toggle("low", left <= 5);
-      secs.textContent = String(Math.ceil(left));
+      var s = Math.ceil(left);
+      if (s !== lastSec) { lastSec = s; secs.textContent = String(s); if (s <= 5) sfxTick(s === 1); }
       timer = requestAnimationFrame(tick);
     }
     function swing(silent) {
@@ -252,88 +630,90 @@
       var hit = M.find(typed, p.compiled, p.pool);
       if (hit) return hit;
       if (!silent) {
-        tries.push(typed);
         var elsewhere = p.pool !== p.compiled.answers && M.find(typed, p.compiled);
-        note.textContent = elsewhere ? "“" + elsewhere.answer.name + "” doesn't start with that letter. Swing again." : "Foul ball. “" + typed + "” isn't on the list. Swing again.";
+        note.textContent = elsewhere ? "“" + elsewhere.answer.name + "” doesn't start with that letter. Try again." : "Misfire. “" + typed + "” isn't on the list. Try again.";
         input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
-        input.select();
+        input.select(); sputter();
       }
       return null;
     }
     function finish(hit, typed) {
-      cancelAnimationFrame(timer); document.removeEventListener("visibilitychange", vis);
+      over = true; cancelAnimationFrame(timer); document.removeEventListener("visibilitychange", vis);
       var r = { prompt: p, typed: typed || "", pts: 0, tier: -1 };
-      if (hit) { r.answer = hit.answer; r.tier = tierOf(p, hit.answer); r.pts = TIERS[r.tier].pts; r.fixed = hit.how === "typo"; }
+      if (hit) { r.answer = hit.answer; r.tier = tierOf(p, hit.answer); r.pts = TIERS[r.tier].km; r.fixed = hit.how === "typo"; boost(r.pts, r.tier); }
+      else stall();
       game.results[game.i] = r;
       reveal(r);
     }
-    /* background tabs pause animation frames; keep the clock honest when the tab returns */
-    function vis() { if (!document.hidden) { cancelAnimationFrame(timer); tick(); } }
+    function vis() { if (!document.hidden && !over) { cancelAnimationFrame(timer); tick(); } }
     document.addEventListener("visibilitychange", vis);
-    form.onsubmit = function (e) { e.preventDefault(); var hit = swing(false); if (hit) finish(hit, input.value.trim()); };
+    form.onsubmit = function (e) { e.preventDefault(); if (over) return; var hit = swing(false); if (hit) finish(hit, input.value.trim()); };
     tick();
   }
 
-  function samples(p, mine) {
+  function others(p, mine) {
     var dl = h("dl", { class: "tiers" });
-    TIERS.forEach(function (t, i) {
-      var inTier = p.pool.filter(function (a) { return tierOf(p, a) === i; });
+    TIERS.forEach(function (t, n) {
+      var inTier = p.pool.filter(function (a) { return tierOf(p, a) === n; });
       if (!inTier.length) return;
-      var pick = shuffle(inTier.slice()).slice(0, 4);
-      if (mine && tierOf(p, mine) === i && pick.indexOf(mine) < 0) pick[0] = mine;
+      var pick = shuffle(inTier.slice()).slice(0, 3);
+      if (mine && tierOf(p, mine) === n && pick.indexOf(mine) < 0) pick[0] = mine;
       var dd = h("dd");
-      pick.forEach(function (a, n) { if (n) dd.appendChild(document.createTextNode(", ")); dd.appendChild(a === mine ? h("b", { text: a.name }) : document.createTextNode(a.name)); });
-      if (inTier.length > pick.length) dd.appendChild(h("span", { class: "muted", text: " +" + (inTier.length - pick.length) + " more" }));
-      dl.appendChild(h("dt", { class: "t" + i, text: t.pts + " · " + t.name })); dl.appendChild(dd);
+      pick.forEach(function (a, j) { if (j) dd.appendChild(document.createTextNode(", ")); dd.appendChild(a === mine ? h("b", { text: a.name }) : document.createTextNode(a.name)); });
+      if (inTier.length > pick.length) dd.appendChild(h("span", { class: "muted", text: " +" + (inTier.length - pick.length) }));
+      dl.appendChild(h("dt", { class: "t" + n, text: t.name })); dl.appendChild(dd);
     });
     return dl;
   }
 
   function reveal(r) {
-    drawLine();
+    drawPips();
     var last = game.i === ROUNDS - 1;
-    var btn = h("button", { class: "btn", id: "next", type: "button" }, [last ? "FINAL SCORE" : "NEXT INNING", h("kbd", { text: "ENTER" })]);
-    function next() { if (last) end(); else { game.i++; atBat(); } }
-    btn.onclick = next; onEnter = next;
+    var b = btn("next", last ? "SEE YOUR FLIGHT" : "NEXT STAGE", function () { if (last) end(); else { game.i++; atBat(); } });
     var top;
     if (r.answer) {
       top = [
-        h("p", { class: "call t" + r.tier, text: TIERS[r.tier].name.toUpperCase() }),
-        h("div", null, [h("span", { class: "answer", text: r.answer.name }), h("span", { class: "pts t" + r.tier, text: "  +" + r.pts })]),
-        r.fixed ? h("p", { class: "muted" }, ["You typed “" + r.typed + "”. Read as ", h("span", { style: "text-transform:capitalize", text: r.answer.name }), "."]) : null
+        h("div", { class: "call" }, [h("strong", { class: "t" + r.tier, text: TIERS[r.tier].name.toUpperCase() }), h("em", { class: "t" + r.tier, text: "+" + r.pts + " km" })]),
+        h("div", { class: "answer", text: r.answer.name }),
+        r.fixed ? h("p", { class: "muted" }, ["You typed “" + r.typed + "”, read as ", h("span", { class: "cap", text: r.answer.name }), "."]) : null
       ];
     } else {
       top = [
-        h("p", { class: "call out", text: "STRUCK OUT" }),
-        h("p", { class: "muted", text: r.typed ? "Time ran out, and “" + r.typed + "” isn't on the list." : "Time ran out with nothing on the board." })
+        h("div", { class: "call" }, [h("strong", { class: "out", text: "ENGINE STALL" }), h("em", { class: "out", text: "+0 km" })]),
+        h("p", { class: "muted", text: r.typed ? "Out of fuel, and “" + r.typed + "” isn't on the list." : "Out of fuel with nothing typed." })
       ];
     }
-    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [samples(r.prompt, r.answer), btn]));
-    btn.focus();
+    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [b, others(r.prompt, r.answer)]));
+    b.focus();
   }
 
   function end() {
-    game.done = true;
-    var total = drawLine();
-    store.games++; store.total += total;
+    game.done = true; drawPips();
+    var total = game.results.reduce(function (s, r) { return s + r.pts; }, 0);
+    store.games++; store.total += total; store.km += total;
     var record = total > store.best; if (record) store.best = total;
     save();
-    var verdict = total >= 600 ? "Hall of Fame game." : total >= 450 ? "All-Star outing." : total >= 300 ? "Solid day at the plate." : total >= 150 ? "A few knocks. Go deeper next time." : "Rough outing. Shake it off.";
+    var top = null; MILES.forEach(function (m) { if (total >= m.km) top = m; });
     var box = h("div", { class: "box" });
-    game.results.forEach(function (r, i) {
-      box.appendChild(h("span", { class: "n", text: String(i + 1) }));
-      box.appendChild(h("span", null, [h("span", { class: "a", text: r.answer ? r.answer.name : "—" }), h("br"), h("span", { class: "q", text: r.prompt.text })]));
-      box.appendChild(h("span", { class: "p " + (r.pts ? "t" + r.tier : "out"), text: String(r.pts) }));
+    game.results.forEach(function (r) {
+      box.appendChild(h("div", null, [h("div", { class: "a", text: r.answer ? r.answer.name : "Stalled" }), h("div", { class: "q", text: r.prompt.text })]));
+      box.appendChild(h("span", { class: "p " + (r.pts ? "t" + r.tier : "out"), text: "+" + r.pts }));
     });
-    var btn = h("button", { class: "btn", id: "again", type: "button" }, ["PLAY AGAIN", h("kbd", { text: "ENTER" })]);
-    btn.onclick = start; onEnter = start;
+    var b = btn("again", "FLY AGAIN", again);
     show([
-      h("div", { class: "label", text: record && store.games > 1 ? "Final · new best" : "Final" }),
-      h("h2", { text: total + " / 700" }),
-      h("p", { text: verdict }),
-      btn, box, statsRow()
+      h("div", { class: "label", text: record && store.games > 1 ? "Flight complete · new record" : "Flight complete" }),
+      h("h2", { text: total + " km" }),
+      h("p", { text: top ? "Highest landmark: " + top.name + ". " + (total >= 100 ? "You made it to space." : "Space starts at 100 km.") : "Never really left the pad. Next flight's yours." }),
+      b, statsRow(), box
     ]);
-    btn.focus();
+    b.focus();
+  }
+
+  function again() {
+    tracking = false; onEnter = null;
+    show([h("div", { class: "label", text: "Returning to the pad" }), h("h2", { text: "Refuelling…" })]);
+    thrustTarget = idle = 0;
+    flyTo(0, alt > 0 ? 1300 : 10, false, function () { countdown(); });
   }
 
   document.addEventListener("keydown", function (e) {
