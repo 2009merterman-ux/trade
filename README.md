@@ -79,7 +79,7 @@ src/
 
 ## Also in this repo: Rare Air
 
-`leftfield/` is a separate, self-contained trivia game (no build step). Each flight is seven broad "Name ..." prompts ("Name an animal", "Name something cold") with 25 seconds each. Every real answer fires a rocket's engine: Common +10 km, Uncommon +25, Rare +50, Epic +75, Legendary +100. An answer that is on none of the lists is sent to Claude to judge, and if it is a real answer it scores One in a Krillion: +150 km. The rocket climbs past real landmarks (Everest, the Kármán line at 100 km, the ISS, Hubble). Typos are corrected to the closest listed answer. Prompts come from a saved deck and don't repeat until all 53 have been played.
+`leftfield/` is a separate, self-contained trivia game (no build step). Each flight is seven Krillion-style "Name ..." prompts ("Name a pasta shape or dish", "Name a news organization", "Name a country with \"and\" in its name") with 25 seconds each. Every real answer fires a rocket's engine: Common +10 km, Uncommon +25, Rare +50, Epic +75, Legendary +100. An answer that is on none of the lists is sent to Claude to judge, and if it is a real answer it scores One in a Krillion: +150 km. The rocket climbs past real landmarks (Everest, the Kármán line at 100 km, the ISS, Hubble). Typos are corrected to the closest listed answer. Prompts come from a saved deck and don't repeat until all 89 have been played.
 
 - Play: the published artifact, where the Claude judge works. Opened as a local file, `leftfield/index.html` still plays, but answers that aren't on a list count as misses.
 - `leftfield/prompts.js` holds the prompts (each one's own lists plus categories pulled from `leftfield/data.js`), and `leftfield/match.js` is the typo-tolerant matcher.
