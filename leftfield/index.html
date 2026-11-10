@@ -1,0 +1,344 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Left Field</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&family=Graduate&display=swap">
+<style>
+  /* Layout: a ballpark scoreboard. Line score across the top, one at-bat (prompt) in the middle. Single dark look by choice. */
+  :root {
+    color-scheme: dark;
+    --board: #0e3b2c;
+    --board-deep: #092a1f;
+    --panel: #14493a;
+    --chalk: #f4f0e1;
+    --dim: #a3c2b3;
+    --rule: rgba(244, 240, 225, .22);
+    --bulb: #ffc83a;
+    --foul: #ff7a66;
+    --t0: #b9cfc4; --t1: #8fe0b0; --t2: #6fd3e6; --t3: #ffa95c; --t4: #ffc83a;
+    --display: "Graduate", "Rockwell", "Courier New", serif;
+    --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+    --label: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--board-deep); color: var(--chalk);
+    font: 400 17px/1.45 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 28px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .label { font: 600 13px/1 var(--label); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--bulb); outline-offset: 3px; }
+
+  /* masthead + line score */
+  .mast { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .mast h1 { font: 400 26px/1 var(--display); letter-spacing: .04em; margin: 0; }
+  .mast h1 span { color: var(--bulb); }
+  .line { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, 1.5fr); border: 2px solid var(--chalk); background: var(--board); }
+  .line > div { text-align: center; padding: 6px 0 8px; border-left: 1px solid var(--rule); min-width: 0; }
+  .line > div:first-child { border-left: 0; }
+  .line .inn { font: 600 12px/1 var(--label); letter-spacing: .1em; color: var(--dim); }
+  .line .run { font: 400 20px/1.2 var(--display); font-variant-numeric: tabular-nums; min-height: 24px; }
+  .line .now { background: var(--panel); }
+  .line .now .inn { color: var(--bulb); }
+  .line .tot { border-left: 2px solid var(--chalk); }
+  .line .tot .run { color: var(--bulb); }
+
+  .card { background: var(--board); border: 2px solid var(--chalk); padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .card h2 { font: 400 clamp(24px, 6.2vw, 34px)/1.15 var(--display); margin: 0; text-wrap: balance; }
+  .card p { margin: 0; max-width: 60ch; }
+  .muted { color: var(--dim); }
+
+  .btn { align-self: flex-start; background: var(--bulb); color: #1d1600; border: 0; padding: 13px 22px; font: 400 18px/1 var(--display); letter-spacing: .05em; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn kbd { font: 600 12px/1 var(--label); letter-spacing: .1em; opacity: .7; margin-left: 10px; }
+
+  /* at-bat */
+  .clock { display: flex; align-items: center; gap: 12px; }
+  .clock .bar { flex: 1; height: 10px; background: var(--board-deep); border: 1px solid var(--rule); }
+  .clock .fill { height: 100%; width: 100%; background: var(--bulb); transform-origin: left; }
+  .clock .fill.low { background: var(--foul); }
+  .clock .secs { font: 400 22px/1 var(--display); width: 2.2ch; text-align: right; font-variant-numeric: tabular-nums; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type=text] {
+    flex: 1 1 220px; min-width: 0; background: var(--board-deep); color: var(--chalk);
+    border: 2px solid var(--chalk); border-radius: 0; padding: 12px 14px; font: 500 20px/1.2 var(--body);
+  }
+  input[type=text]::placeholder { color: var(--dim); opacity: .7; }
+  .shake { animation: shake .3s; }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .note { min-height: 1.45em; color: var(--foul); font-weight: 500; }
+
+  /* result */
+  .call { font: 400 clamp(26px, 7vw, 40px)/1.1 var(--display); margin: 0; }
+  .pts { font: 400 22px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .t0 { color: var(--t0); } .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .out { color: var(--foul); }
+  .answer { font-size: 22px; font-weight: 600; text-transform: capitalize; }
+  .tiers { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .tiers dt { font: 600 13px/1.5 var(--label); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+  .tiers dd { margin: 0; text-transform: capitalize; color: var(--chalk); overflow-wrap: anywhere; }
+  .tiers dd b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--bulb); text-underline-offset: 3px; }
+
+  /* box score */
+  .box { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 14px; align-items: baseline; border-top: 1px solid var(--rule); padding-top: 14px; }
+  .box .q { color: var(--dim); font-size: 15px; }
+  .box .a { text-transform: capitalize; font-weight: 500; overflow-wrap: anywhere; }
+  .box .n { font: 600 13px/1 var(--label); color: var(--dim); }
+  .box .p { font: 400 17px/1 var(--display); font-variant-numeric: tabular-nums; text-align: right; }
+  .stats { display: flex; gap: 26px; flex-wrap: wrap; }
+  .stats div { display: flex; flex-direction: column; gap: 6px; }
+  .stats b { font: 400 24px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .how { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; }
+  .how dt { font: 400 17px/1.45 var(--display); font-variant-numeric: tabular-nums; text-align: right; }
+  .how dd { margin: 0; }
+  @media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <h1>LEFT <span>FIELD</span></h1>
+    <div class="label" id="gameNo">7 innings · rarer answers go further</div>
+  </header>
+  <div class="line" id="line" aria-label="Line score"></div>
+  <main id="stage"></main>
+</div>
+
+<script src="data.js"></script>
+<script src="match.js"></script>
+<script>
+(function () {
+  var ROUNDS = 7, SECONDS = 25;
+  var TIERS = [
+    { name: "Routine play", pts: 10 },
+    { name: "Base hit", pts: 25 },
+    { name: "Extra bases", pts: 50 },
+    { name: "Off the wall", pts: 75 },
+    { name: "Out of the park", pts: 100 }
+  ];
+  var M = window.LF_match, stage = document.getElementById("stage"), lineEl = document.getElementById("line");
+
+  /* ---------- storage (optional; the game works without it) ---------- */
+  function load() { try { return JSON.parse(localStorage.getItem("leftfield") || "{}") || {}; } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem("leftfield", JSON.stringify(store)); } catch (e) {} }
+  var store = load();
+  store.games = store.games || 0; store.best = store.best || 0; store.total = store.total || 0; store.deck = store.deck || [];
+
+  /* ---------- prompts ---------- */
+  function makePrompt(id, group, text, pool, compiled) {
+    var min = Math.min.apply(null, pool.map(function (a) { return a.tier; }));
+    return { id: id, group: group, text: text, pool: pool, compiled: compiled, shift: min };
+  }
+  var base = [], variants = [];
+  window.LF_DATA.forEach(function (cat) {
+    var c = M.compile(cat);
+    base.push(makePrompt(cat.id, cat.group, "Name " + cat.noun, c.answers, c));
+    if (cat.letters === false || c.answers.length < 40) return;
+    var byLetter = {};
+    c.answers.forEach(function (a) { var l = M.key(a.name)[0]; (byLetter[l] = byLetter[l] || []).push(a); });
+    Object.keys(byLetter).forEach(function (l) {
+      var pool = byLetter[l];
+      if (!/[a-z]/.test(l) || pool.length < 5 || !pool.some(function (a) { return a.tier <= 2; })) return;
+      variants.push(makePrompt(cat.id + ":" + l, cat.group, "Name " + cat.noun + " starting with " + l.toUpperCase(), pool, c));
+    });
+  });
+  var byId = {}; base.forEach(function (p) { byId[p.id] = p; });
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function tierOf(p, a) { return Math.max(0, a.tier - p.shift); }
+
+  /* Five categories dealt from a deck that only reshuffles once every category has come up, plus two letter twists. */
+  function deal() {
+    var picks = [], groups = {}, held = [], guard = 0;
+    while (picks.length < 5 && guard++ < 500) {
+      if (!store.deck.length) store.deck = shuffle(base.map(function (p) { return p.id; }));
+      var p = byId[store.deck.pop()];
+      if (!p) continue;
+      if (groups[p.group]) { held.push(p.id); continue; }
+      groups[p.group] = 1; picks.push(p);
+    }
+    store.deck = store.deck.concat(held);
+    var pool = shuffle(variants.slice());
+    for (var i = 0; i < pool.length && picks.length < ROUNDS; i++) {
+      if (groups[pool[i].group]) continue;
+      groups[pool[i].group] = 1; picks.push(pool[i]);
+    }
+    save();
+    return shuffle(picks);
+  }
+
+  /* ---------- rendering helpers ---------- */
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    for (var k in (attrs || {})) { if (k === "text") el.textContent = attrs[k]; else if (k === "html") el.innerHTML = attrs[k]; else el.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  function show(nodes) { stage.replaceChildren(h("section", { class: "card" }, nodes)); }
+  var game = null, timer = null, onEnter = null;
+
+  function drawLine() {
+    lineEl.replaceChildren();
+    var total = 0;
+    for (var i = 0; i < ROUNDS; i++) {
+      var r = game && game.results[i];
+      if (r) total += r.pts;
+      var cell = h("div", { class: game && game.i === i && !game.done ? "now" : "" }, [
+        h("div", { class: "inn", text: String(i + 1) }),
+        h("div", { class: "run " + (r ? (r.pts ? "t" + r.tier : "out") : ""), text: r ? String(r.pts) : "" })
+      ]);
+      lineEl.appendChild(cell);
+    }
+    lineEl.appendChild(h("div", { class: "tot" }, [h("div", { class: "inn", text: "TOTAL" }), h("div", { class: "run", text: game ? String(total) : "" })]));
+    return total;
+  }
+
+  /* ---------- screens ---------- */
+  function home() {
+    game = null; drawLine();
+    var how = h("dl", { class: "how" });
+    TIERS.forEach(function (t, i) {
+      how.appendChild(h("dt", { class: "t" + i, text: String(t.pts) }));
+      how.appendChild(h("dd", null, [h("span", { class: "t" + i, text: t.name })]));
+    });
+    var btn = h("button", { class: "btn", id: "play", type: "button" }, ["PLAY BALL", h("kbd", { text: "ENTER" })]);
+    btn.onclick = start; onEnter = start;
+    show([
+      h("h2", { text: "Name something nobody else would." }),
+      h("p", { text: "Seven prompts, " + SECONDS + " seconds each. Any answer on the list scores, and the less obvious it is, the more it's worth. Spelling doesn't have to be perfect: close is read as what you meant." }),
+      how,
+      btn,
+      store.games ? statsRow() : h("p", { class: "muted", text: "Out of 700. Play as many games as you like; every game deals seven fresh prompts." })
+    ]);
+    btn.focus();
+  }
+  function statsRow() {
+    function stat(label, value) { return h("div", null, [h("span", { class: "label", text: label }), h("b", { text: String(value) })]); }
+    return h("div", { class: "stats" }, [stat("Games", store.games), stat("Best", store.best), stat("Average", Math.round(store.total / store.games))]);
+  }
+
+  function start() {
+    game = { prompts: deal(), results: [], i: 0, done: false };
+    document.getElementById("gameNo").textContent = "Game " + (store.games + 1);
+    atBat();
+  }
+
+  function atBat() {
+    var p = game.prompts[game.i]; drawLine(); onEnter = null;
+    var fill = h("div", { class: "fill" }), secs = h("div", { class: "secs", text: String(SECONDS) });
+    var input = h("input", { type: "text", id: "answer", autocomplete: "off", autocapitalize: "off", autocorrect: "off", spellcheck: "false", placeholder: "Type an answer", "aria-label": p.text, enterkeyhint: "go" });
+    var note = h("div", { class: "note", role: "status" });
+    var form = h("form", null, [input, h("button", { class: "btn", type: "submit", text: "SWING" })]);
+    show([
+      h("div", { class: "label", text: "Inning " + (game.i + 1) + " of " + ROUNDS }),
+      h("h2", { text: p.text }),
+      h("div", { class: "clock" }, [h("div", { class: "bar" }, [fill]), secs]),
+      form, note
+    ]);
+    input.focus();
+    var t0 = performance.now(), tries = [];
+    function tick() {
+      var left = SECONDS - (performance.now() - t0) / 1000;
+      if (left <= 0) { finish(input.value.trim() ? swing(true) : null, input.value.trim()); return; }
+      fill.style.transform = "scaleX(" + (left / SECONDS) + ")";
+      fill.classList.toggle("low", left <= 5);
+      secs.textContent = String(Math.ceil(left));
+      timer = requestAnimationFrame(tick);
+    }
+    function swing(silent) {
+      var typed = input.value.trim();
+      if (!typed) return null;
+      var hit = M.find(typed, p.compiled, p.pool);
+      if (hit) return hit;
+      if (!silent) {
+        tries.push(typed);
+        var elsewhere = p.pool !== p.compiled.answers && M.find(typed, p.compiled);
+        note.textContent = elsewhere ? "“" + elsewhere.answer.name + "” doesn't start with that letter. Swing again." : "Foul ball. “" + typed + "” isn't on the list. Swing again.";
+        input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+        input.select();
+      }
+      return null;
+    }
+    function finish(hit, typed) {
+      cancelAnimationFrame(timer); document.removeEventListener("visibilitychange", vis);
+      var r = { prompt: p, typed: typed || "", pts: 0, tier: -1 };
+      if (hit) { r.answer = hit.answer; r.tier = tierOf(p, hit.answer); r.pts = TIERS[r.tier].pts; r.fixed = hit.how === "typo"; }
+      game.results[game.i] = r;
+      reveal(r);
+    }
+    /* background tabs pause animation frames; keep the clock honest when the tab returns */
+    function vis() { if (!document.hidden) { cancelAnimationFrame(timer); tick(); } }
+    document.addEventListener("visibilitychange", vis);
+    form.onsubmit = function (e) { e.preventDefault(); var hit = swing(false); if (hit) finish(hit, input.value.trim()); };
+    tick();
+  }
+
+  function samples(p, mine) {
+    var dl = h("dl", { class: "tiers" });
+    TIERS.forEach(function (t, i) {
+      var inTier = p.pool.filter(function (a) { return tierOf(p, a) === i; });
+      if (!inTier.length) return;
+      var pick = shuffle(inTier.slice()).slice(0, 4);
+      if (mine && tierOf(p, mine) === i && pick.indexOf(mine) < 0) pick[0] = mine;
+      var dd = h("dd");
+      pick.forEach(function (a, n) { if (n) dd.appendChild(document.createTextNode(", ")); dd.appendChild(a === mine ? h("b", { text: a.name }) : document.createTextNode(a.name)); });
+      if (inTier.length > pick.length) dd.appendChild(h("span", { class: "muted", text: " +" + (inTier.length - pick.length) + " more" }));
+      dl.appendChild(h("dt", { class: "t" + i, text: t.pts + " · " + t.name })); dl.appendChild(dd);
+    });
+    return dl;
+  }
+
+  function reveal(r) {
+    drawLine();
+    var last = game.i === ROUNDS - 1;
+    var btn = h("button", { class: "btn", id: "next", type: "button" }, [last ? "FINAL SCORE" : "NEXT INNING", h("kbd", { text: "ENTER" })]);
+    function next() { if (last) end(); else { game.i++; atBat(); } }
+    btn.onclick = next; onEnter = next;
+    var top;
+    if (r.answer) {
+      top = [
+        h("p", { class: "call t" + r.tier, text: TIERS[r.tier].name.toUpperCase() }),
+        h("div", null, [h("span", { class: "answer", text: r.answer.name }), h("span", { class: "pts t" + r.tier, text: "  +" + r.pts })]),
+        r.fixed ? h("p", { class: "muted" }, ["You typed “" + r.typed + "”. Read as ", h("span", { style: "text-transform:capitalize", text: r.answer.name }), "."]) : null
+      ];
+    } else {
+      top = [
+        h("p", { class: "call out", text: "STRUCK OUT" }),
+        h("p", { class: "muted", text: r.typed ? "Time ran out, and “" + r.typed + "” isn't on the list." : "Time ran out with nothing on the board." })
+      ];
+    }
+    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [samples(r.prompt, r.answer), btn]));
+    btn.focus();
+  }
+
+  function end() {
+    game.done = true;
+    var total = drawLine();
+    store.games++; store.total += total;
+    var record = total > store.best; if (record) store.best = total;
+    save();
+    var verdict = total >= 600 ? "Hall of Fame game." : total >= 450 ? "All-Star outing." : total >= 300 ? "Solid day at the plate." : total >= 150 ? "A few knocks. Go deeper next time." : "Rough outing. Shake it off.";
+    var box = h("div", { class: "box" });
+    game.results.forEach(function (r, i) {
+      box.appendChild(h("span", { class: "n", text: String(i + 1) }));
+      box.appendChild(h("span", null, [h("span", { class: "a", text: r.answer ? r.answer.name : "—" }), h("br"), h("span", { class: "q", text: r.prompt.text })]));
+      box.appendChild(h("span", { class: "p " + (r.pts ? "t" + r.tier : "out"), text: String(r.pts) }));
+    });
+    var btn = h("button", { class: "btn", id: "again", type: "button" }, ["PLAY AGAIN", h("kbd", { text: "ENTER" })]);
+    btn.onclick = start; onEnter = start;
+    show([
+      h("div", { class: "label", text: record && store.games > 1 ? "Final · new best" : "Final" }),
+      h("h2", { text: total + " / 700" }),
+      h("p", { text: verdict }),
+      btn, box, statsRow()
+    ]);
+    btn.focus();
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && onEnter && e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") { e.preventDefault(); onEnter(); }
+  });
+  home();
+})();
+</script>

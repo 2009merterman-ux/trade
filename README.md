@@ -76,3 +76,10 @@ src/
   characters/        NPC stand-ins and the model registry
   ui/                HUD, menus, catch card, case opening, upgrader
 ```
+
+## Also in this repo: Left Field
+
+`leftfield/` is a separate, self-contained trivia game (no build step). Seven "Name a…" prompts per game, 25 seconds each; any answer on the list scores, and less obvious answers score more (10 to 100, 700 max). Typos are corrected to the closest accepted answer, and you can play game after game: categories are dealt from a deck that only reshuffles once everything has come up.
+
+- Play: open `leftfield/index.html` in a browser.
+- `leftfield/data.js` is the prompt bank (add a category with one `C(...)` call), `leftfield/match.js` is the typo-tolerant matcher.
