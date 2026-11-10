@@ -70,7 +70,7 @@
   .btn:hover { filter: brightness(1.08); }
   .btn kbd { font: 600 11px/1 var(--body); letter-spacing: .1em; opacity: .75; }
 
-  .legend { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .legend div { border-radius: 10px; padding: 8px 4px; text-align: center; background: rgba(255, 255, 255, .06); min-width: 0; }
   .legend b { display: block; font: 700 15px/1.1 var(--mono); }
   .legend span { font: 600 10.5px/1.2 var(--body); color: var(--dim); white-space: nowrap; }
@@ -90,12 +90,14 @@
   .shake { animation: shake .3s; }
   @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
   .note { min-height: 1.45em; color: var(--bad); font-weight: 500; }
+  .note.wait { color: var(--dim); }
+  .btn:disabled, input:disabled { opacity: .6; cursor: progress; }
 
   .count { font: 800 88px/1 var(--display); text-align: center; }
   .call { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .call strong { font: 800 clamp(28px, 8vw, 40px)/1 var(--display); letter-spacing: .01em; }
   .call em { font: 700 22px/1 var(--mono); font-style: normal; }
-  .t0 { color: var(--t0); } .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .out { color: var(--bad); }
+  .t0 { color: var(--t0); } .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .t5 { background: linear-gradient(90deg, #ff4fd8, #ffd84a, #6dffa8, #5fd4ff, #c48bff); -webkit-background-clip: text; background-clip: text; color: transparent; } .out { color: var(--bad); }
   .answer { font-size: 21px; font-weight: 600; text-transform: capitalize; }
   .cap { text-transform: capitalize; }
   .tiers { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; border-top: 1px solid var(--line); padding-top: 12px; margin: 0; font-size: 15px; }
@@ -130,6 +132,7 @@
 </div>
 
 <script src="data.js"></script>
+<script src="prompts.js"></script>
 <script src="match.js"></script>
 <script>
 (function () {
@@ -140,8 +143,10 @@
     { name: "Uncommon", km: 25, c: "#6dffa8" },
     { name: "Rare", km: 50, c: "#5fd4ff" },
     { name: "Epic", km: 75, c: "#c48bff" },
-    { name: "Legendary", km: 100, c: "#ffd84a" }
+    { name: "Legendary", km: 100, c: "#ffd84a" },
+    { name: "One in a Krillion", km: 150, c: "#ff4fd8" }
   ];
+  var KRILLION = 5;
   var MILES = [
     { km: 0.83, name: "Burj Khalifa", line: "Higher than the world's tallest building" },
     { km: 8.85, name: "Mount Everest", line: "You just cleared the summit of Everest" },
@@ -152,7 +157,8 @@
     { km: 100, name: "Kármán line", line: "You are officially in space" },
     { km: 408, name: "International Space Station", line: "Level with the ISS" },
     { km: 515, name: "Hubble Space Telescope", line: "Passing Hubble" },
-    { km: 700, name: "Perfect flight", line: "700 km. Nobody flies higher" }
+    { km: 700, name: "700 km club", line: "Higher than any all-Legendary flight" },
+    { km: 1000, name: "Krillion orbit", line: "1,000 km. Off the charts" }
   ];
   var MOON = 384400;
   var M = window.LF_match;
@@ -166,44 +172,51 @@
   function save() { try { localStorage.setItem("rareair", JSON.stringify(store)); } catch (e) {} }
 
   /* ---------- prompts ---------- */
-  function makePrompt(id, group, text, pool, compiled) {
-    var min = Math.min.apply(null, pool.map(function (a) { return a.tier; }));
-    return { id: id, group: group, text: text, pool: pool, compiled: compiled, shift: min };
-  }
-  var base = [], variants = [];
-  window.LF_DATA.forEach(function (cat) {
-    var c = M.compile(cat);
-    base.push(makePrompt(cat.id, cat.group, "Name " + cat.noun, c.answers, c));
-    if (cat.letters === false || c.answers.length < 40) return;
-    var byLetter = {};
-    c.answers.forEach(function (a) { var l = M.key(a.name)[0]; (byLetter[l] = byLetter[l] || []).push(a); });
-    Object.keys(byLetter).forEach(function (l) {
-      var pool = byLetter[l];
-      if (!/[a-z]/.test(l) || pool.length < 5 || !pool.some(function (a) { return a.tier <= 2; })) return;
-      variants.push(makePrompt(cat.id + ":" + l, cat.group, "Name " + cat.noun + " starting with " + l.toUpperCase(), pool, c));
-    });
-  });
+  var base = window.LF_PROMPTS.map(function (p) { return { id: p.id, text: p.text, group: p.group, compiled: M.compile(p) }; });
   var byId = {}; base.forEach(function (p) { byId[p.id] = p; });
   function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function tierOf(p, a) { return Math.max(0, a.tier - p.shift); }
-  /* Five categories from a deck that only reshuffles once every category has come up, plus two letter twists. */
+  function tierOf(p, a) { return a.tier; }
+  /* Seven prompts from one saved deck: no prompt comes back until every other prompt has been played,
+     and when the deck is reshuffled the ones played most recently go to the bottom. */
   function deal() {
     var picks = [], groups = {}, held = [], guard = 0;
-    while (picks.length < 5 && guard++ < 500) {
-      if (!store.deck.length) store.deck = shuffle(base.map(function (p) { return p.id; }));
-      var p = byId[store.deck.pop()];
+    store.recent = store.recent || [];
+    while (picks.length < ROUNDS && guard++ < 2000) {
+      if (!store.deck.length) {
+        var keep = store.recent.concat(picks.map(function (p) { return p.id; }), held);
+        var fresh = shuffle(base.map(function (p) { return p.id; }).filter(function (id) { return keep.indexOf(id) < 0; }));
+        store.deck = store.recent.filter(function (id) { return byId[id] && keep.indexOf(id) >= 0 && held.indexOf(id) < 0 && !picks.some(function (p) { return p.id === id; }); }).concat(fresh);
+        if (!store.deck.length) break;
+      }
+      var id = store.deck.pop(), p = byId[id];
       if (!p) continue;
-      if (groups[p.group]) { held.push(p.id); continue; }
+      if (groups[p.group]) { held.push(id); continue; }
       groups[p.group] = 1; picks.push(p);
     }
-    store.deck = store.deck.concat(held);
-    var pool = shuffle(variants.slice());
-    for (var i = 0; i < pool.length && picks.length < ROUNDS; i++) {
-      if (groups[pool[i].group]) continue;
-      groups[pool[i].group] = 1; picks.push(pool[i]);
-    }
+    store.deck = store.deck.concat(held.reverse());
+    store.recent = store.recent.concat(picks.map(function (p) { return p.id; })).slice(-28);
     save();
-    return shuffle(picks);
+    return picks;
+  }
+
+  /* ---------- the judge: answers on no list go to Claude ---------- */
+  var judgeOK = true;
+  var samplerP = (window.claude && typeof window.claude.use === "function") ? Promise.resolve(window.claude.use("sample")).catch(function () { return null; }) : Promise.resolve(null);
+  samplerP.then(function (s) { if (!s) judgeOK = false; });
+  function judge(p, typed) {
+    return samplerP.then(function (s) {
+      if (!s || !judgeOK) return null;
+      var q = "You judge a trivia game. Players name things for a prompt, and real answers nobody else thinks of score the most.\n" +
+        "Prompt: \"" + p.text + "\"\nPlayer typed: \"" + typed.slice(0, 80) + "\"\n" +
+        "Is this a real, genuine answer that fits the prompt? Be fair and fairly generous at the edges of the category, and accept misspellings of real things. " +
+        "Say no to gibberish, made-up things, and things that clearly don't fit.\n" +
+        "Reply with only JSON: {\"valid\": true or false, \"answer\": \"the proper name of what they meant\", \"reason\": \"at most 12 words, to the player\"}";
+      return s.json(q, { modelTier: "quick", cache: { gcTime: 86400000 } }).catch(function (e) {
+        var code = e && e.code;
+        if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0) { judgeOK = false; return null; }
+        return { error: true };
+      });
+    });
   }
 
   /* ---------- sound (Web Audio, synthesised; starts after the first click) ---------- */
@@ -233,7 +246,7 @@
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     s.connect(f); f.connect(g); g.connect(a.destination); s.start(t); s.stop(t + dur + 0.05);
   }
-  var NOTES = [523, 659, 784, 1047, 1319];
+  var NOTES = [523, 659, 784, 1047, 1319, 1568];
   function sfxBoost(tier) { roar(1.6 + tier * 0.3, 900 + tier * 450, 0.35 + tier * 0.05); for (var i = 0; i <= tier; i++) tone(NOTES[i], 0.04 + i * 0.09, 0.3, "triangle", 0.11); }
   function sfxFoul() { tone(150, 0, 0.16, "square", 0.06); tone(110, 0.11, 0.2, "square", 0.06); }
   function sfxStall() { roar(0.7, 400, 0.15); tone(196, 0, 0.3, "sawtooth", 0.05); tone(147, 0.2, 0.45, "sawtooth", 0.05); }
@@ -266,14 +279,18 @@
     }
   }
   function rnd(a, b) { return a + Math.random() * (b - a); }
+  function hueHex(h) {
+    function f(n) { var k = (n + h / 30) % 12, c = 0.6 - 0.6 * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return ("0" + Math.round(c * 255 + 60).toString(16)).slice(-2); }
+    return "#" + f(0) + f(8) + f(4);
+  }
   var stars = [], clouds = [], sats = [], mtn = [], lines = [], i;
   for (i = 0; i < 260; i++) stars.push({ x: Math.random(), y: Math.random(), r: rnd(0.4, 1.6), tw: rnd(0, 6.3) });
   for (i = 0; i < 46; i++) clouds.push({ km: rnd(0.6, 13), x: rnd(-0.15, 1.15), w: rnd(50, 150), a: rnd(0.65, 0.95) });
-  for (i = 0; i < 16; i++) sats.push({ km: rnd(150, 690), x: Math.random(), v: rnd(-0.02, 0.02) });
+  for (i = 0; i < 24; i++) sats.push({ km: rnd(150, 1000), x: Math.random(), v: rnd(-0.02, 0.02) });
   for (i = 0; i <= 24; i++) mtn.push(rnd(0.25, 1) * (i % 2 ? 0.55 : 1));
   for (i = 0; i < 36; i++) lines.push({ x: Math.random(), y: Math.random(), l: rnd(0.4, 1) });
 
-  var alt = 0, fly = null, thrust = 0, thrustTarget = 0, idle = 0, flameColor = TIERS[0].c, shake = 0, flash = 0, flashColor = "#ffffff";
+  var rainbow = false, alt = 0, fly = null, thrust = 0, thrustTarget = 0, idle = 0, flameColor = TIERS[0].c, shake = 0, flash = 0, flashColor = "#ffffff";
   var parts = [], floats = [], lastT = 0, lastCam = 0, lineOff = 0, tracking = false, mIdx = 0, toastQ = [], toastBusy = false;
   function flyTo(to, dur, boost, cb) { fly = { from: alt, to: to, t0: performance.now(), dur: dur, boost: boost, cb: cb }; }
   function ease(p) { return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
@@ -382,6 +399,7 @@
       if (p >= 1) { var cb = fly.cb; alt = fly.to; fly = null; thrustTarget = idle; if (cb) cb(); }
     }
     thrust += (thrustTarget - thrust) * Math.min(1, dt * 7);
+    if (rainbow) flameColor = hueHex((now / 4) % 360);
     var g = geometry(), cam = F(alt), dCam = cam - lastCam; lastCam = cam;
     if (Math.abs(dCam) > 2000) dCam = 0;
     var speed = Math.abs(dCam) / dt;
@@ -505,7 +523,7 @@
       ctx.globalAlpha = 1;
     }
     /* altitude ruler */
-    [1, 5, 10, 20, 50, 100, 200, 300, 400, 500, 600, 700].forEach(function (km) {
+    [1, 5, 10, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000].forEach(function (km) {
       var y = Y(km); if (y < 90 || y > H - 10) return;
       ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fillRect(W - 14, y, 10, 1.5); label(km + " km", W - 18, y + 4, "right", "rgba(255,255,255,.6)");
     });
@@ -527,11 +545,11 @@
   }
   function boost(km, tier) {
     var g = geometry();
-    flameColor = TIERS[tier].c; idle = 0.3;
+    rainbow = tier === KRILLION; flameColor = TIERS[tier].c; idle = 0.3;
     flyTo(alt + km, 1700 + tier * 280, true);
-    shake = [3, 5, 7, 10, 14][tier];
+    shake = [3, 5, 7, 10, 14, 18][tier];
     floats.push({ t: "+" + km + " km", c: TIERS[tier].c, life: 0 });
-    if (tier >= 3) { emit(g, tier === 4 ? 110 : 50, "k"); flash = tier === 4 ? 0.55 : 0.25; flashColor = TIERS[tier].c; }
+    if (tier >= 3) { emit(g, [0, 0, 0, 50, 110, 220][tier], "k"); flash = [0, 0, 0, 0.25, 0.55, 0.75][tier]; flashColor = TIERS[tier].c; }
     sfxBoost(tier);
   }
   function sputter() { emit(geometry(), 14, "s"); shake = 3; thrust = 0.05; sfxFoul(); }
@@ -555,7 +573,7 @@
     pipsEl.replaceChildren();
     for (var n = 0; n < ROUNDS; n++) {
       var r = game && game.results[n], el = h("span", { class: "pip" });
-      if (r && r.pts) { el.style.background = TIERS[r.tier].c; el.style.borderColor = TIERS[r.tier].c; }
+      if (r && r.pts) { el.style.background = r.tier === KRILLION ? "linear-gradient(135deg,#ff4fd8,#ffd84a,#5fd4ff)" : TIERS[r.tier].c; el.style.borderColor = TIERS[r.tier].c; }
       else if (r) el.classList.add("miss");
       else if (game && !game.done && game.i === n) el.classList.add("now");
       pipsEl.appendChild(el);
@@ -577,9 +595,9 @@
     var b = btn("play", "LAUNCH", function () { audio(); countdown(); });
     show([
       h("h1", { class: "title" }, ["RARE ", h("span", { text: "AIR" })]),
-      h("p", { text: "Seven prompts, " + SECONDS + " seconds each. Every answer on the list fires the engine, and the less obvious it is, the higher you fly. Typos are fine: close counts." }),
+      h("p", { text: "Seven prompts, " + SECONDS + " seconds each. Every real answer fires the engine, and the less obvious it is, the higher you fly. Name something real that isn't on my list at all and it's One in a Krillion: +150 km. Typos are fine." }),
       legend, b,
-      store.games ? statsRow() : h("p", { class: "muted", text: "Clear 100 km to reach space. A perfect flight is 700 km, past Hubble." })
+      store.games ? statsRow() : h("p", { class: "muted", text: "Clear 100 km to reach space. Prompts don't repeat until you've played them all." })
     ]);
     b.focus();
   }
@@ -617,53 +635,58 @@
     function tick() {
       if (over) return;
       var left = SECONDS - (performance.now() - t0) / 1000;
-      if (left <= 0) { var typed = input.value.trim(); finish(typed ? swing(true) : null, typed); return; }
+      if (checking) { timer = requestAnimationFrame(tick); return; }
+      if (left <= 0) { var typed = input.value.trim(); finish(local(typed), typed); return; }
       fill.style.transform = "scaleX(" + (left / SECONDS) + ")";
       fill.classList.toggle("low", left <= 5);
       var s = Math.ceil(left);
       if (s !== lastSec) { lastSec = s; secs.textContent = String(s); if (s <= 5) sfxTick(s === 1); }
       timer = requestAnimationFrame(tick);
     }
-    function swing(silent) {
-      var typed = input.value.trim();
-      if (!typed) return null;
-      var hit = M.find(typed, p.compiled, p.pool);
-      if (hit) return hit;
-      if (!silent) {
-        var elsewhere = p.pool !== p.compiled.answers && M.find(typed, p.compiled);
-        note.textContent = elsewhere ? "“" + elsewhere.answer.name + "” doesn't start with that letter. Try again." : "Misfire. “" + typed + "” isn't on the list. Try again.";
-        input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
-        input.select(); sputter();
-      }
-      return null;
+    var checking = false, pausedAt = 0, fire = form.querySelector("button");
+    function local(typed) { return typed ? M.find(typed, p.compiled) : null; }
+    function misfire(typed, msg) {
+      note.className = "note";
+      note.textContent = msg || "Misfire. “" + typed + "” doesn't fit. Try again.";
+      input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake");
+      input.focus(); input.select(); sputter();
     }
     function finish(hit, typed) {
       over = true; cancelAnimationFrame(timer); document.removeEventListener("visibilitychange", vis);
       var r = { prompt: p, typed: typed || "", pts: 0, tier: -1 };
-      if (hit) { r.answer = hit.answer; r.tier = tierOf(p, hit.answer); r.pts = TIERS[r.tier].km; r.fixed = hit.how === "typo"; boost(r.pts, r.tier); }
+      if (hit) { r.answer = hit.answer; r.tier = tierOf(p, hit.answer); r.pts = TIERS[r.tier].km; r.fixed = hit.how === "typo"; r.reason = hit.reason; boost(r.pts, r.tier); }
       else stall();
       game.results[game.i] = r;
       reveal(r);
     }
     function vis() { if (!document.hidden && !over) { cancelAnimationFrame(timer); tick(); } }
     document.addEventListener("visibilitychange", vis);
-    form.onsubmit = function (e) { e.preventDefault(); if (over) return; var hit = swing(false); if (hit) finish(hit, input.value.trim()); };
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      var typed = input.value.trim();
+      if (over || checking || !typed) return;
+      var hit = local(typed);
+      if (hit) return finish(hit, typed);
+      if (!judgeOK) return misfire(typed, "Misfire. “" + typed + "” isn't on the list. Try again.");
+      checking = true; pausedAt = performance.now();
+      input.disabled = true; fire.disabled = true;
+      note.className = "note wait"; note.textContent = "Not on my list. Checking with mission control… (clock paused)";
+      judge(p, typed).then(function (v) {
+        checking = false; t0 += performance.now() - pausedAt;
+        input.disabled = false; fire.disabled = false;
+        if (over) return;
+        if (!v) return misfire(typed, "Misfire. “" + typed + "” isn't on the list. Try again.");
+        if (v.error) return misfire(typed, "Mission control didn't answer. Try another one.");
+        if (v.valid === true) {
+          var name = String(v.answer || typed).trim().slice(0, 60) || typed;
+          var again = local(name);
+          if (again) return finish({ answer: again.answer, how: "typo" }, typed);
+          return finish({ answer: { name: name, tier: KRILLION }, how: "krillion", reason: String(v.reason || "").slice(0, 120) }, typed);
+        }
+        misfire(typed, v.reason ? "Mission control says no: " + String(v.reason).slice(0, 120) : null);
+      });
+    };
     tick();
-  }
-
-  function others(p, mine) {
-    var dl = h("dl", { class: "tiers" });
-    TIERS.forEach(function (t, n) {
-      var inTier = p.pool.filter(function (a) { return tierOf(p, a) === n; });
-      if (!inTier.length) return;
-      var pick = shuffle(inTier.slice()).slice(0, 3);
-      if (mine && tierOf(p, mine) === n && pick.indexOf(mine) < 0) pick[0] = mine;
-      var dd = h("dd");
-      pick.forEach(function (a, j) { if (j) dd.appendChild(document.createTextNode(", ")); dd.appendChild(a === mine ? h("b", { text: a.name }) : document.createTextNode(a.name)); });
-      if (inTier.length > pick.length) dd.appendChild(h("span", { class: "muted", text: " +" + (inTier.length - pick.length) }));
-      dl.appendChild(h("dt", { class: "t" + n, text: t.name })); dl.appendChild(dd);
-    });
-    return dl;
   }
 
   function reveal(r) {
@@ -675,15 +698,16 @@
       top = [
         h("div", { class: "call" }, [h("strong", { class: "t" + r.tier, text: TIERS[r.tier].name.toUpperCase() }), h("em", { class: "t" + r.tier, text: "+" + r.pts + " km" })]),
         h("div", { class: "answer", text: r.answer.name }),
+        r.tier === KRILLION ? h("p", { class: "muted", text: "Not on my list, and it's real. " + (r.reason || "") }) : null,
         r.fixed ? h("p", { class: "muted" }, ["You typed “" + r.typed + "”, read as ", h("span", { class: "cap", text: r.answer.name }), "."]) : null
       ];
     } else {
       top = [
         h("div", { class: "call" }, [h("strong", { class: "out", text: "ENGINE STALL" }), h("em", { class: "out", text: "+0 km" })]),
-        h("p", { class: "muted", text: r.typed ? "Out of fuel, and “" + r.typed + "” isn't on the list." : "Out of fuel with nothing typed." })
+        h("p", { class: "muted", text: r.typed ? "Out of fuel before “" + r.typed + "” was fired." : "Out of fuel with nothing fired." })
       ];
     }
-    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [b, others(r.prompt, r.answer)]));
+    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [b]));
     b.focus();
   }
 
