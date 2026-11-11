@@ -25,34 +25,22 @@
 
   /* ---------- straight from the bank ---------- */
   S("pasta", "Name a pasta shape or dish", "food");
-  S("fruit", "Name a fruit", "food");
-  S("vegetable", "Name a vegetable", "food");
   S("cheese", "Name a type of cheese", "food");
   S("spice", "Name a herb or spice", "food");
   S("topping", "Name a pizza topping", "food");
-  S("icecream", "Name an ice cream flavour", "food");
   S("cocktail", "Name a cocktail", "food");
   S("bread", "Name a type of bread", "food");
   S("soup", "Name a soup", "food");
   S("coffee", "Name a coffee or tea drink", "food");
-  S("dessert", "Name a dessert", "food");
-  S("breakfast", "Name a breakfast food", "food");
   S("sauce", "Name a sauce or condiment", "food");
   S("nut", "Name a nut or seed you can eat", "food");
-  S("dog", "Name a dog breed", "fauna");
-  S("bird", "Name a bird", "fauna");
-  S("sea", "Name something that lives in the ocean", "fauna");
   S("insect", "Name a bug or creepy-crawly", "fauna");
   S("dino", "Name a dinosaur or prehistoric creature", "fauna");
   S("reptile", "Name a reptile or amphibian", "fauna");
-  S("farm", "Name an animal you'd find on a farm", "fauna");
-  S("safari", "Name an animal you'd see on safari", "fauna");
-  S("country", "Name a country", "place");
   S("country-europe", "Name a country in Europe", "place");
   S("country-asia", "Name a country in Asia", "place");
   S("country-africa", "Name a country in Africa", "place");
   S("country-americas", "Name a country in North or South America", "place");
-  S("usstate", "Name a US state", "place");
   S("eurocap", "Name a European capital city", "place");
   S("river", "Name a river", "place");
   S("mountain", "Name a mountain or mountain range", "place");
@@ -63,23 +51,18 @@
   S("painter", "Name a famous painter", "people");
   S("composer", "Name a classical composer", "people");
   S("god", "Name a Greek or Roman god", "people");
-  S("sport", "Name a sport", "play");
   S("boardgame", "Name a board game", "play");
   S("cardgame", "Name a card game", "play");
   S("martial", "Name a martial art or combat sport", "play");
   S("dance", "Name a style of dance", "play");
   S("genre", "Name a genre of music", "play");
-  S("instrument", "Name a musical instrument", "play");
   S("shakespeare", "Name a Shakespeare play", "culture");
   S("myth", "Name a mythical creature", "culture");
   S("language", "Name a language", "culture");
   S("hat", "Name a type of hat", "stuff");
   S("tool", "Name a tool you'd find in a toolbox or shed", "stuff");
-  S("cloth", "Name an item of clothing", "stuff");
-  S("furniture", "Name a piece of furniture", "stuff");
   S("boat", "Name a type of boat or ship", "stuff");
   S("shoe", "Name a type of shoe", "stuff");
-  S("kitchen", "Name something in a kitchen drawer or cupboard", "stuff");
   S("tree", "Name a tree", "nature");
   S("flower", "Name a flower", "nature");
   S("weather", "Name a type of weather or natural disaster", "nature");
@@ -240,6 +223,174 @@
     "azure,cerulean,indigo,ultramarine,periwinkle,steel blue,ice blue,slate blue,cornflower|cornflower blue,duck egg|duck egg blue,petrol|petrol blue,tiffany blue,aquamarine,cadet blue,dodger blue,alice blue,oxford blue,carolina blue,columbia blue,egyptian blue,prussian blue,persian blue,sea blue,admiral blue,airforce blue|air force blue,police blue",
     "klein blue|international klein blue|ikb,phthalo blue,yinmn blue,bondi blue,maya blue,celeste,cyan process,process blue,pantone classic blue|classic blue,majorelle blue,delft blue,wedgwood blue,cambridge blue,eton blue,yale blue,duke blue,berkeley blue,true blue,brandeis blue,picotee blue,egyptian faience,lapis lazuli|lapis,smalt,zaffre,woad,indigo dye,blue jeans,glaucous,peacock blue,kingfisher blue,robin's egg blue|robin egg blue,blue bell|bluebell,cobalt teal,marine blue,space cadet,neon blue,blurple,twitter blue,facebook blue,ikea blue,bic blue|biro blue,ink blue,blueberry,dusty blue,french blue,china blue,bleu de france,blue grey|blue gray",
     "caeruleum,mountain blue,blue verditer,bremen blue,manganese blue,cerulean frost,han blue,maya blue clay,lazurite,azurite,cornflower glass,cobalt glass|bristol blue,blue willow,blue ridge,spanish blue,st patrick's blue,bleu celeste,savoy blue,true navy,admiralty blue,watchet,perse,bice,mazarine,smalt blue,pervenche,lavender blue,uranian blue,electric indigo,ultramarine ash,resolution blue,catalina blue,cyan cornflower,little boy blue,non photo blue,honolulu blue,tufts blue,ucla blue,penn blue,brilliant azure,vivid cerulean,palatinate blue,persian indigo,liberty blue,egyptian blue frit,haint blue,carolina haint blue,blue lagoon,pool blue,ice queen,arctic blue,glacier blue,frost blue,tardis blue,smurf blue,cookie monster blue,sonic blue,avatar blue,dory blue,stitch blue,ravenclaw blue,chelsea blue,everton blue,rangers blue,italia blue|azzurro,les bleus blue"
+  ]);
+
+  /* ---------- harder prompts: a category with a twist ---------- */
+  P("flightless", "Name a bird that can't fly", "fauna", [
+    "penguin,ostrich,emu,chicken",
+    "kiwi,dodo,cassowary,turkey",
+    "rhea,kakapo,emperor penguin,king penguin,moa,elephant bird",
+    "takahe,steamer duck,great auk,flightless cormorant|galapagos cormorant,weka,kagu,adelie penguin,gentoo penguin,chinstrap penguin,little penguin|fairy penguin|blue penguin,rockhopper penguin,macaroni penguin,humboldt penguin,african penguin,magellanic penguin,yellow eyed penguin",
+    "inaccessible island rail,adzebill,aptornis,terror bird|phorusrhacos,gastornis|diatryma,dromornis,genyornis,hesperornis,giant moa,little bush moa,upland moa,stephens island wren,lord howe woodhen,okinawa rail,guam rail,henderson crake,auckland island teal,campbell teal,kakapo,snares penguin,erect crested penguin,fiordland penguin,royal penguin,galapagos penguin,rodrigues solitaire,reunion ibis,mascarene coot,red rail,chatham rail,laysan rail,wake island rail,tristan moorhen,gough moorhen,nightingale island rail"
+  ]);
+
+  P("seamammal", "Name a mammal that lives in the sea", "fauna", [
+    "whale,dolphin,seal",
+    "sea lion,walrus,orca|killer whale,manatee|sea cow,sea otter,blue whale,humpback|humpback whale",
+    "dugong,porpoise,narwhal,beluga,sperm whale,polar bear,minke|minke whale,fin whale,grey whale|gray whale,right whale,bowhead|bowhead whale,pilot whale,elephant seal,leopard seal,fur seal,harbour seal|harbor seal,bottlenose dolphin",
+    "monk seal,harp seal,hooded seal,ringed seal,bearded seal,weddell seal,crabeater seal,ross seal,grey seal|gray seal,spotted seal,ribbon seal,baikal seal,caspian seal,steller sea lion,california sea lion,australian sea lion,new zealand sea lion,galapagos sea lion,sei whale,bryde's whale,omura's whale,pygmy right whale,beaked whale,cuvier's beaked whale,pygmy sperm whale,dwarf sperm whale,false killer whale,melon headed whale,pygmy killer whale,risso's dolphin,spinner dolphin,spotted dolphin,dusky dolphin,hector's dolphin,maui dolphin,commerson's dolphin,irrawaddy dolphin,hourglass dolphin,common dolphin,striped dolphin,dall's porpoise,harbour porpoise|harbor porpoise",
+    "vaquita,steller's sea cow,marine otter,west indian manatee,amazonian manatee,west african manatee,baiji|yangtze river dolphin,amazon river dolphin|boto,ganges river dolphin,indus river dolphin,la plata dolphin|franciscana,tucuxi,finless porpoise,burmeister's porpoise,spectacled porpoise,northern bottlenose whale,southern bottlenose whale,baird's beaked whale,arnoux's beaked whale,shepherd's beaked whale,longman's beaked whale,blainville's beaked whale,spade toothed whale,strap toothed whale,stejneger's beaked whale,sowerby's beaked whale,true's beaked whale,gervais' beaked whale,hubbs' beaked whale,perrin's beaked whale,deraniyagala's beaked whale,ramari's beaked whale,guadalupe fur seal,juan fernandez fur seal,antarctic fur seal,subantarctic fur seal,northern fur seal,caribbean monk seal,hawaiian monk seal,mediterranean monk seal,japanese sea lion,desmostylus,ambulocetus,basilosaurus,livyatan,fishing bat"
+  ]);
+
+  P("eggmammal", "Name an animal that lays eggs", "fauna", [
+    "turtle,snake,crocodile,frog,fish",
+    "lizard,alligator,tortoise,spider,insect,ant,bee,butterfly,platypus,shark,salmon,octopus,snail,chameleon",
+    "echidna,komodo dragon,gecko,iguana,toad,newt,salamander,axolotl,ladybird|ladybug,moth,mosquito,fly,cockroach,beetle,termite,wasp,squid,cuttlefish,lobster,crab,shrimp|prawn,cod,trout,tuna,clownfish,seahorse,starfish,jellyfish,slug,worm|earthworm,scorpion,tick,mite,python,cobra,iguana",
+    "monotreme,short beaked echidna,long beaked echidna,tuatara,gharial,caiman,monitor lizard,gila monster,bearded dragon,leopard gecko,king cobra,black mamba,horseshoe crab,nautilus,ammonite,sea urchin,sea turtle,leatherback turtle,loggerhead,mudskipper,lungfish,sturgeon,paddlefish,caecilian,olm,hellbender,stick insect,praying mantis,dragonfly,cicada,silkworm,monarch butterfly,honeybee queen|queen bee,queen ant,termite queen,anglerfish,lamprey,hagfish,skate,ray,chimaera,catshark,bamboo shark,horn shark,port jackson shark,swell shark,epaulette shark",
+    "dinosaur,triceratops,t rex,velociraptor,oviraptor,maiasaura,pterosaur,dimetrodon,archelon,surinam toad,midwife toad,darwin's frog,gastric brooding frog,glass frog,tomato frog,little skate,thornback ray,zebra shark,whitespotted bamboo shark,brownbanded bamboo shark,draughtsboard shark,coral catshark,elephant shark,rabbitfish,spotted ratfish,tardigrade,velvet worm,water bear,rotifer,planarian,leech,sea hare,nudibranch,cone snail,giant african land snail,apple snail,argonaut,dumbo octopus,blue ringed octopus,giant pacific octopus,mimic octopus,vampire squid,firefly squid,bobtail squid,spirula,brachiopod,horseshoe worm,chiton,tusk shell,peripatus,bristletail,silverfish,weta,stag beetle,goliath beetle,dung beetle,bombardier beetle,lanternfly,giant water bug,water strider,assassin bug,stink bug,pond skater,mayfly,stonefly,caddisfly,antlion,lacewing,scorpionfly,flea"
+  ]);
+
+  P("placedog", "Name a dog breed named after a place", "fauna", [
+    "labrador|labrador retriever,german shepherd,dalmatian,chihuahua,yorkshire terrier|yorkie",
+    "great dane,pomeranian,maltese,newfoundland,siberian husky|husky,rottweiler,boston terrier,french bulldog,english bulldog|bulldog,st bernard|saint bernard,bernese mountain dog",
+    "afghan hound,pekingese,west highland terrier|westie,scottish terrier|scottie,irish setter,irish wolfhound,weimaraner,airedale,norfolk terrier,norwich terrier,border collie,lhasa apso,tibetan mastiff,tibetan terrier,akita,havanese,portuguese water dog,brittany,bedlington terrier,rhodesian ridgeback,australian shepherd,australian cattle dog,alaskan malamute,cardigan welsh corgi|pembroke welsh corgi|welsh corgi",
+    "leonberger,kerry blue terrier,skye terrier,manchester terrier,lakeland terrier,welsh terrier,staffordshire bull terrier|staffy,american staffordshire terrier,chesapeake bay retriever,neapolitan mastiff,bolognese,maremma sheepdog,bergamasco,entlebucher,appenzeller,tosa,kai ken,kishu,hokkaido,jindo|korean jindo,thai ridgeback,phu quoc ridgeback,carolina dog,ibizan hound,pyrenean mountain dog|great pyrenees,catalan sheepdog,dogue de bordeaux,beauceron,briard,picardy spaniel,glen of imaal terrier,shetland sheepdog|sheltie,welsh springer spaniel,clumber spaniel,sussex spaniel,norwegian elkhound,finnish spitz,finnish lapphund,swedish vallhund,icelandic sheepdog,greenland dog,canaan dog,anatolian shepherd,kangal,caucasian shepherd,central asian shepherd,russian toy,moscow watchdog,dutch shepherd,belgian malinois|malinois,belgian tervuren,groenendael,laekenois",
+    "rafeiro do alentejo,cao da serra da estrela|estrela mountain dog,castro laboreiro dog,cao de fila de sao miguel,azores cattle dog,perro de presa canario|presa canario,majorca shepherd|ca de bestiar,ca de bou|majorca mastiff,ca rater mallorqui,ibizan podenco,podenco canario,andalusian hound,cretan hound,lancashire heeler,cumberland sheepdog,sealyham terrier,cesky terrier,slovakian chuvach,slovensky kopov,bohemian shepherd,transylvanian hound,croatian sheepdog,istrian shorthaired hound,posavac hound,bosnian coarse haired hound,karst shepherd,sarplaninac,montenegrin mountain hound,tornjak,bulgarian shepherd,karakachan,romanian mioritic,carpathian shepherd,bucovina shepherd,tatra shepherd,polish lowland sheepdog,ogar polski,hanoverian scent hound,bavarian mountain hound,westphalian dachsbracke,styrian coarse haired hound,tyrolean hound,lucerne hound,bernese hound,jura hound,smaland hound,halden hound,karelian bear dog,east siberian laika,west siberian laika,yakutian laika,chukotka sled dog,sakhalin husky,taiwan dog|formosan mountain dog,chinese chongqing dog|chongqing dog,xiasi dog,kunming wolfdog,tibetan kyi apso,bhotia,rampur greyhound,mudhol hound,rajapalayam,kombai,chippiparai,kanni,kintamani dog|kintamani,new guinea singing dog,africanis,boerboel,aidi|atlas mountain dog,sloughi,cordoba fighting dog,dogo argentino,fila brasileiro,cimarron uruguayo,peruvian inca orchid|peruvian hairless,chihuahua,alaskan klee kai,american eskimo dog,drentsche patrijshond|drentse partridge dog,frisian water dog|wetterhoun,bouvier des flandres,bouvier des ardennes,berger de brie,pont-audemer spaniel,braque d'auvergne,braque de l'ariege,braque du bourbonnais,epagneul breton,gascon saintongeois,grand bleu de gascogne,petit basset griffon vendeen,briquet griffon vendeen,ariegeois,poitevin,anglo-francais"
+  ]);
+
+  P("islandnation", "Name a country that's an island or group of islands", "place", [
+    "japan,iceland,united kingdom|uk|great britain|britain,ireland,new zealand,madagascar",
+    "cuba,jamaica,philippines,indonesia,sri lanka,maldives,malta,cyprus,bahamas|the bahamas,fiji,singapore,taiwan,australia",
+    "bahrain,mauritius,seychelles,barbados,trinidad and tobago|trinidad,samoa,tonga,papua new guinea,dominican republic,haiti,east timor|timor leste,brunei,greenland,bermuda,puerto rico,cape verde|cabo verde,comoros,sao tome and principe|sao tome,vanuatu,solomon islands",
+    "saint lucia|st lucia,grenada,dominica,antigua and barbuda|antigua,saint kitts and nevis|st kitts,saint vincent and the grenadines|st vincent,kiribati,tuvalu,nauru,palau,micronesia,marshall islands,faroe islands,isle of man,jersey,guernsey,aruba,curacao,cayman islands,turks and caicos,british virgin islands,falkland islands,new caledonia,french polynesia|tahiti,cook islands,niue",
+    "tokelau,pitcairn islands|pitcairn,wallis and futuna,american samoa,guam,northern mariana islands,christmas island,cocos islands|cocos keeling islands,norfolk island,saint helena|st helena,ascension island,tristan da cunha,svalbard,aland islands|aland,zanzibar,bougainville,rotuma,anjouan,mayotte,reunion,martinique,guadeloupe,saint barthelemy|st barts,saint martin|sint maarten,montserrat,anguilla,bonaire,saba,sint eustatius,saint pierre and miquelon,sealand,northern cyprus"
+  ]);
+
+  P("landlocked", "Name a country with no coastline", "place", [
+    "switzerland,austria,nepal,mongolia,bolivia",
+    "paraguay,hungary,czech republic|czechia,afghanistan,ethiopia,uganda,zambia,zimbabwe,botswana,luxembourg,bhutan,kazakhstan,laos,belarus",
+    "slovakia,serbia,north macedonia|macedonia,moldova,liechtenstein,andorra,san marino,vatican city|vatican,uzbekistan,kyrgyzstan,tajikistan,turkmenistan,armenia,azerbaijan,rwanda,burundi,malawi,mali,niger,chad,south sudan,central african republic,burkina faso,lesotho,eswatini|swaziland",
+    "kosovo,transnistria,south ossetia,artsakh|nagorno karabakh,liechtenstein,uzbekistan",
+    "doubly landlocked,principality of liechtenstein,tibet,orange free state,transvaal,bohemia,bavaria,swiss confederation,hungary 1920,saxony,thuringia,upper volta,rhodesia,bechuanaland,basutoland,nyasaland,ruanda-urundi"
+  ]);
+
+  P("canadastate", "Name a US state that borders Canada", "place", [
+    "alaska,washington,michigan,new york,maine",
+    "montana,minnesota,vermont,north dakota",
+    "idaho,new hampshire",
+    "ohio,pennsylvania",
+    "point roberts"
+  ]);
+
+  P("starflag", "Name a country whose flag has a star on it", "place", [
+    "united states|usa|us|america,china,australia,new zealand,israel",
+    "brazil,turkey,vietnam,north korea,chile,cuba,puerto rico,syria,venezuela,panama,ghana,morocco,algeria,pakistan,singapore",
+    "somalia,cameroon,senegal,ethiopia,myanmar|burma,philippines,malaysia,papua new guinea,samoa,solomon islands,tuvalu,micronesia,marshall islands,nauru,tajikistan,turkmenistan,uzbekistan,azerbaijan,jordan,iraq,liberia,togo,burkina faso,cape verde|cabo verde,mozambique,djibouti,guinea-bissau|guinea bissau,sao tome and principe,equatorial guinea,angola,zimbabwe,democratic republic of the congo|drc,burundi,south sudan,kosovo,bosnia and herzegovina|bosnia,honduras,dominica,grenada,saint kitts and nevis|st kitts,suriname,curacao,mauritania,tunisia,libya,comoros,east timor|timor leste",
+    "texas,tokelau,christmas island,cook islands,heard island,new zealand's southern cross,aruba,bonaire,niue",
+    "sahrawi republic|western sahara,somaliland,northern cyprus,chechnya,ichkeria,tibet,manchukuo,confederate states,republic of texas,biafra,katanga,sarawak,sabah,nunavut,alaska state flag,arizona,tennessee,chicago,washington dc"
+  ]);
+
+  P("ballless", "Name a sport you don't need a ball for", "play", [
+    "swimming,running|athletics,boxing,skiing,cycling",
+    "gymnastics,surfing,skateboarding,snowboarding,wrestling,karate,judo,fencing,archery,rowing,ice skating|figure skating,diving,climbing|rock climbing,horse riding|equestrian,sailing,darts,martial arts,taekwondo,weightlifting,marathon,triathlon,mma|ufc",
+    "badminton,curling,bobsleigh|bobsled,luge,skeleton,speed skating,biathlon,ski jumping,kayaking|canoeing,motocross,formula 1|f1|motor racing,bmx,parkour,high jump,long jump,pole vault,javelin,shot put,discus,hammer throw,hurdles,decathlon,heptathlon,pentathlon|modern pentathlon,trampolining,synchronised swimming|artistic swimming,kickboxing,muay thai,sumo,shooting,orienteering,paragliding,skydiving,windsurfing,kitesurfing,wakeboarding,water skiing,rafting,dog sledding|mushing,rodeo,bull riding,horse racing,show jumping,dressage,powerlifting,bodybuilding,arm wrestling,tug of war,cheerleading,dance|dancesport,chess,esports,drag racing,nascar,rallying,karting,speedway",
+    "ultimate frisbee|ultimate,disc golf,quidditch|quadball,roller derby,ice climbing,bouldering,speed climbing,sport climbing,canyoning,caving,freediving,spearfishing,fin swimming,underwater hockey,canoe slalom,dragon boat racing,outrigger,stand up paddleboarding|sup,bodyboarding,skimboarding,slacklining,highlining,base jumping,wingsuit flying,hang gliding,gliding,ballooning,aerobatics,air racing,drone racing,land sailing,ice yachting,snowkiting,skijoring,mountain biking,downhill,enduro,trials,cyclocross,track cycling,keirin,madison,omnium,bmx freestyle,unicycling,inline skating,speed skating short track,ice dancing,synchronised skating,figure skating pairs,trampoline,tumbling,acrobatic gymnastics,aerobic gymnastics,pole sport,aerial silks,trapeze,capoeira,kendo,iaido,kyudo,naginata,sambo,savate,krav maga,jiu jitsu|bjj,greco roman wrestling,freestyle wrestling,lucha libre,pro wrestling,glima,schwingen,kabaddi,kho kho,mallakhamb,highland games,caber toss,strongman,crossfit,obstacle racing,tough mudder,ninja warrior,stair climbing,fell running,ultramarathon,race walking,steeplechase,cross country,biathlon",
+    "joust|jousting,falconry,camel racing,ostrich racing,pigeon racing,greyhound racing,harness racing,barrel racing,tent pegging,buzkashi,kok boru,mounted archery,yabusame,horseback archery,cowboy mounted shooting,cutting,reining,team roping,steer wrestling,calf roping,sheep shearing,woodchopping|timbersports,log rolling,axe throwing,knife throwing,competitive eating,cheese rolling,bog snorkelling,wife carrying,toe wrestling,shin kicking,chess boxing,extreme ironing,gurning,welly wanging,coal carrying,haggis hurling,worm charming,conker fighting|conkers,pea shooting,stone skimming|stone skipping,sandcastle building,sand yachting,speed cubing,sport stacking,tiddlywinks,yo yo,kendama,juggling,diabolo,rope skipping|jump rope,double dutch,hula hooping,pogo,stilts,ironman,swimrun,aquathlon,duathlon,quadrathlon,ice swimming,winter swimming,open water swimming,channel swimming,marathon swimming,synchronized diving,cliff diving,high diving,platform diving,springboard diving,apnea"
+  ]);
+
+  P("underground", "Name a vegetable that grows underground", "food", [
+    "potato,carrot,onion,beetroot|beet,garlic",
+    "radish,parsnip,sweet potato,turnip,ginger,yam,swede|rutabaga",
+    "celeriac,horseradish,jerusalem artichoke|sunchoke,cassava|yuca|manioc,taro,shallot,turmeric,daikon,peanut|groundnut",
+    "salsify,jicama,lotus root,water chestnut,burdock|gobo,wasabi,galangal,konjac,black salsify|scorzonera,parsley root|hamburg parsley,chervil root,skirret,oca,ulluco,yacon,mashua,arracacha,chinese artichoke|crosne,tiger nut|chufa,arrowroot,malanga|yautia,eddoe,ginseng,chicory root",
+    "earthnut|pignut,silverweed,camas|camassia,wapato|arrowhead,breadroot|prairie turnip,groundnut apios|potato bean,yam bean,winged bean root,ahipa,maca,mauka,achira,jacatupe,ensete,kudzu root,lotus rhizome,cattail root,bulrush root,sea kale root,rampion,evening primrose root,dandelion root,jicama de agua,taro corm,konnyaku,nagaimo,mountain yam|yamaimo,chinese yam,purple yam|ube,elephant foot yam,giant swamp taro,tannia,dasheen,coco yam,mangelwurzel|mangold,sugar beet,fodder beet,licorice root,valerian root,marshmallow root,orris root,angelica root,lovage root,sweet cicely root,salep,truffle"
+  ]);
+
+  P("mononym", "Name a famous person known by just one name", "people", [
+    "madonna,beyonce,adele,rihanna,cher,drake",
+    "pele,prince,shakira,eminem,zendaya,bono,sting,elvis,banksy,lizzo,sia,lorde,usher,pink|p!nk,bjork,enya,neymar,ronaldinho,cleopatra,napoleon,michelangelo,plato,aristotle,socrates",
+    "moby,seal,akon,ne-yo|neyo,ciara,brandy,monica,aaliyah,avicii,skrillex,deadmau5,tiesto,grimes,halsey,dido,jewel,lulu,sade,yanni,twiggy,liberace,houdini,morrissey,kaka,cafu,raphael,donatello,rembrandt,titian,caravaggio,voltaire,moliere,homer,virgil,ovid,sappho,confucius,buddha,muhammad,jesus,moses,nostradamus,charlemagne,saladin,attila,rumi,hafez,tutankhamun,nefertiti,ramesses,hammurabi,mr t,zayn,ye,sza,rosalia,anitta,maluma,stromae,falco,nena,charo,fabio,iman,gisele,kesha|ke$ha",
+    "coolio,nelly,eve,ashanti,mya,tank,jaheim,ginuwine,maxwell,sisqo,mario,tyrese,omarion,fergie,estelle,duffy,limahl,marilyn,sinitta,yazz,sonique,jamelia,javine,lemar,example,wiley,skepta,stormzy,dave,aitch,raye,pink,shaggy,pitbull,ozuna,anuel,mika,romario,rivaldo,bebeto,zico,socrates,jairzinho,garrincha,vava,careca,dida,juninho,denilson,hulk,fred,oscar,willian,alisson,ederson,marquinhos,pedri,gavi,isco,koke,joselu,nani,deco,pepe,eusebio,raul,xavi,guti,michel",
+    "hergé|herge,moebius,saki,colette,stendhal,novalis,voltaire,molière,petrarch,dante,giotto,masaccio,donatello,titian,tintoretto,veronese,canaletto,correggio,parmigianino,pontormo,bronzino,el greco,leonardo,averroes,avicenna,maimonides,euclid,archimedes,pythagoras,hippocrates,galen,ptolemy,herodotus,thucydides,xenophon,plutarch,tacitus,suetonius,livy,pliny,seneca,juvenal,martial,horace,catullus,lucretius,aesop,diogenes,epicurus,zeno,heraclitus,parmenides,democritus,anaxagoras,empedocles,thales,solon,lycurgus,pericles,themistocles,leonidas,xerxes,darius,cyrus,croesus,midas,boudicca,vercingetorix,arminius,spartacus,hannibal,hamilcar,jugurtha,mithridates,zenobia,hypatia,theodora,justinian,belisarius,alcuin,bede,canute|cnut,rurik,rollo,tamerlane,babur,akbar,jahangir,shah jahan,aurangzeb,ashoka,kalidasa,kabir,tulsidas,mirabai,valmiki,vyasa,lalon,sukarno,suharto,garrincha,eusébio,marta,formiga,sissi,cristiane"
+  ]);
+
+  P("stripes", "Name an animal with stripes", "fauna", [
+    "zebra,tiger,bee|bumblebee,skunk",
+    "raccoon,chipmunk,okapi,clownfish,wasp,badger,ring tailed lemur|lemur,tabby cat,hornet,striped bass",
+    "bongo,kudu,numbat,thylacine|tasmanian tiger,striped hyena,garter snake,coral snake,tiger shark,zebra shark,angelfish,sergeant major fish|sergeant major,tiger moth,cinnabar moth caterpillar,monarch caterpillar,zebra finch,zebra mussel,quagga,tiger barb,zebra danio|zebrafish,banded mongoose,sea krait|banded sea krait,king snake,milk snake,striped skunk,nyala,sitatunga,tiger salamander,tiger beetle",
+    "aardwolf,bontebok,zebra duiker,banded linsang,striped possum,striped polecat|zorilla,african striped weasel,striped rabbit|sumatran striped rabbit,striped dolphin,zebra pleco,tiger pleco,convict cichlid,banded archerfish,moorish idol,lionfish,clown loach,harlequin rasbora,tiger snake,banded krait,sea snake,zebra tarantula,wasp spider,zebra jumping spider,tiger swallowtail,zebra longwing,zebra swallowtail,hoverfly,yellowjacket,cuckoo bee,flower beetle,colorado potato beetle,lined seahorse,striped marlin,skipjack tuna,striped mullet,thirteen lined ground squirrel,eastern chipmunk,siberian chipmunk,mountain zebra,grevy's zebra,plains zebra",
+    "zonkey,zorse,zebroid,bengal tiger,sumatran tiger,malayan tiger,south china tiger,caspian tiger,bali tiger,javan tiger,white tiger,golden tiger,banded palm civet,owston's palm civet,ring tailed cat,ringtail,ring tailed mongoose,narrow striped mongoose|narrow striped boky,broad striped vontsira,lowland streaked tenrec,eastern barred bandicoot,striped dunnart,banded hare wallaby,striped grass mouse,four striped grass mouse,striped field mouse,zebra mouse,striped bark scorpion,banded demoiselle,banded cat shark,zebra horn shark,zebra moray,zebra lionfish,zebra turkeyfish,bluestriped grunt,porkfish,banded butterflyfish,copperband butterflyfish,raccoon butterflyfish,threadfin butterflyfish,emperor angelfish,regal angelfish,flame angelfish,zebra seahorse,striped catfish|plotosus,tiger tail seahorse,tiger cowrie,cone snail,tiger flatworm,candy stripe flatworm,zebra nerite snail,tiger nerite,zebra snail"
+  ]);
+
+  P("shell", "Name something that has a shell", "nature", [
+    "snail,turtle,tortoise,egg,crab",
+    "lobster,oyster,clam,mussel,nut,coconut,armadillo,shrimp|prawn,scallop,peanut,taco",
+    "barnacle,hermit crab,nautilus,limpet,whelk,conch,cockle,sea urchin,beetle,pistachio,walnut,chestnut,acorn,pecan,almond,brazil nut,hazelnut,crawfish|crayfish,razor clam,abalone,cowrie,periwinkle,sea snail,pie|pie crust,cannoli,tart,bullet|shotgun shell|cartridge,artillery shell|shell,ammonite,horseshoe crab,woodlouse|pill bug,ladybird|ladybug,cicada,seed,sunflower seed,pumpkin seed,shell suit,computer shell|command line|bash",
+    "trilobite,chiton,tusk shell,ark clam,geoduck,quahog,cherrystone,littleneck,giant clam,triton,murex,olive shell,auger shell,tulip shell,wentletrap,sundial shell,nerite,top shell,turban shell,moon snail,slipper limpet,keyhole limpet,argonaut|paper nautilus,spirula,cuttlefish|cuttlebone,sea butterfly,foraminifera,diatom,radiolarian,coccolithophore,brachiopod,ostracod|seed shrimp,clam shrimp,tadpole shrimp,coconut crab,king crab,spider crab,mantis shrimp,krill,copepod,isopod,glyptodon,ankylosaurus,ostrich egg,quail egg,duck egg,dragon egg,easter egg,kinder egg,lychee,longan,rambutan,mangosteen,durian,peanut shell,macadamia,cashew,pine nut,ginkgo nut,candlenut,kola nut,betel nut,areca nut,sea bean,mermaid's purse",
+    "shell company,shell suit,shell game,shell shock,shell script,shell oil|shell,shell pasta|conchiglie,shell beach,seashell,cockleshell,scallop shell,abalone shell,mother of pearl|nacre,cameo shell,cowrie money,wampum,conch horn,tortoiseshell,turtle shell rattle,carapace,plastron,exoskeleton,cuticle,chitin,test,operculum,periostracum,electron shell,valence shell,nuclear shell,shell model,shell star,dyson shell,shell galaxy,eggshell,eggshell paint,shell keep|shell keep castle,shell cottage,shell grotto|margate shell grotto,shell house,shell midden,shell mound,shell fossil,fossil shell,ammonite fossil,belemnite,orthoceras,baculite,rudist,gastropod,bivalve,cephalopod,scaphopod,polyplacophoran,monoplacophoran"
+  ]);
+
+  P("placecheese", "Name a cheese named after a place", "food", [
+    "cheddar,parmesan|parmigiano|parmigiano reggiano,brie,gouda,edam",
+    "camembert,stilton,roquefort,monterey jack,gorgonzola,emmental|emmentaler,gruyere,wensleydale,red leicester,swiss,manchego",
+    "double gloucester,cheshire,lancashire,caerphilly,jarlsberg,asiago,limburger,munster|muenster,comte,epoisses,pont l'eveque,neufchatel,oaxaca,cotija,colby,havarti,tilsit|tilsiter,appenzeller,taleggio,pecorino romano|pecorino,grana padano,mozzarella di bufala campana",
+    "maroilles,langres,chaource,mont d'or|vacherin mont d'or,beaufort,abondance,saint nectaire,cantal,salers,laguiole,bleu d'auvergne,fourme d'ambert,valencay,sainte maure de touraine|sainte maure,selles sur cher,crottin de chavignol,pouligny saint pierre,rocamadour,banon,port salut,castelmagno,bra,montasio,piave,raschera,provolone valpadana,quartirolo lombardo,ragusano,pecorino sardo,pecorino toscano,fiore sardo,idiazabal,cabrales,mahon,torta del casar,zamorano,roncal,tronchon,serra da estrela,sao jorge,azeitao,evora,dorset blue vinny|blue vinny,shropshire blue,dovedale,buxton blue,derby,sage derby,leicester,swaledale,coverdale,cotherstone,teviotdale,dunlop,orkney,lanark blue,dunsyre blue,gubbeen,durrus,coolea,milleens,ardrahan,cashel blue,cheddar gorge",
+    "jarlsberg,norvegia,herrgard,vasterbotten,danbo,esrom,samso,maribo,elbo,fynbo,tybo,leyden|leidse kaas,limburger,herve,maredsous,passendale,chimay,orval,westmalle,bergues,boulette d'avesnes,bethmale,ossau iraty|ossau-iraty,tomme de savoie,tamie,chevrotin,persille des aravis,bleu de gex,bleu de bresse,bleu des causses,bleu du vercors,saint marcellin,saint felicien,picodon,pelardon,mothais,chabichou du poitou,coulommiers,brie de meaux,brie de melun,olivet,livarot,bondard,neufchatel,mont des cats,trappiste de timadeuc,abbaye de tamie,pyrenees,lagniole,kefalograviera,metsovone,san simon,casin,gamonedo,picon bejes-tresviso,quesucos de liebana,arzua ulloa,cebreiro,san simon da costa,valdeon,la serena,los beyos,ibores,majorero,palmero,flor de guia,herreno,sbrinz,vacherin fribourgeois,l'etivaz,berner alpkase,glarus|schabziger,tilsit,allgauer emmentaler,altenburger ziegenkase,harzer,mainzer,nieheimer,quargel,steirerkase,vorarlberger bergkase,mondseer,paski sir|pag cheese,livno cheese,travnik cheese,sjenica cheese,liptauer,olomoucke tvaruzky|olomouc cheese"
+  ]);
+
+  P("smallcap", "Name a capital city that isn't its country's biggest city", "place", [
+    "washington dc|washington|dc,canberra,ottawa,brasilia",
+    "wellington,ankara,bern|berne,pretoria,abuja,islamabad,new delhi",
+    "naypyidaw|naypyitaw,astana|nur sultan,dodoma,yamoussoukro,rabat,porto novo|porto-novo,quito,sucre,la paz,sri jayawardenepura kotte|kotte,putrajaya,cape town,bloemfontein,belmopan,gitega,lilongwe,valletta,vaduz,palikir,ngerulmud",
+    "sejong,oyala|ciudad de la paz,montpelier,albany,sacramento,tallahassee,springfield,harrisburg,carson city,juneau,olympia,salem,annapolis,trenton,dover,frankfort,jefferson city,lansing,pierre,bismarck,cheyenne,helena,santa fe,topeka,concord,augusta,hartford,montgomery,baton rouge,columbia,victoria|victoria,quebec city,regina,fredericton",
+    "lobamba,mbabane,amsterdam,the hague,la paz,sucre,melekeok,port of spain,hamilton,cockburn town,plymouth,brades,philipsburg,marigot,gustavia,basse-terre,fort-de-france,longyearbyen,adamstown,jamestown,edinburgh of the seven seas,stanley,king edward point,grytviken,flying fish cove,west island,kingston,avarua,alofi,mata-utu,pago pago,hagatna,capitol hill"
+  ]);
+
+  P("oddsymbol", "Name a chemical element whose symbol doesn't match its English name", "science", [
+    "gold,iron,silver,sodium",
+    "lead,potassium,copper,mercury,tin",
+    "tungsten,antimony",
+    "",
+    ""
+  ]);
+
+  P("silent", "Name a word with a silent letter", "words", [
+    "knife,know,knee,write,island,hour,honest,lamb,thumb",
+    "knock,knight,knit,wrong,wrap,wrist,listen,castle,climb,comb,bomb,ghost,psychology,sword,answer,half,calf,talk,walk,could,would,should,doubt,debt,salmon,yolk,folk,ballet,receipt,muscle,scissors,science,scene,wednesday,often",
+    "gnome,gnaw,gnat,sign,design,foreign,campaign,reign,align,autumn,column,hymn,condemn,solemn,damn,psalm,pneumonia,psychic,pseudonym,rhythm,rhyme,rhubarb,rhinoceros|rhino,ghetto,ghoul,heir,herb,honour|honor,whistle,fasten,soften,glisten,bristle,wrestle,thistle,christmas,mortgage,handkerchief,wednesday,cupboard,raspberry,aisle,isle,subtle,indict,victuals,colonel,yacht,tsunami,czar|tsar,chalk,would,plumber,numb,crumb,tomb,womb,limb,climber,dumb,succumb,subpoena",
+    "knapsack,knell,knoll,knuckle,knave,kneel,knead,knob,wreck,wren,wriggle,wrangle,wraith,wreath,writhe,wry,gnarled,gnostic,gnu,phlegm,paradigm,diaphragm,apropos,bourgeois,chamois,faux,debris,rendezvous,corps,coup,depot,ballet,buffet,chalet,crochet,gourmet,sachet,valet,beret,cabaret,croquet,parquet,ricochet,bouquet,potpourri,mnemonic,pterodactyl,ptarmigan,ptomaine,psoriasis,psalter,asthma,isthmus,almond,salve,calm,palm,balm,qualm,could,catch,match,itch,watch,listen,moisten,hustle,castle,jostle,apostle,epistle,bustle,nestle,trestle,wrestler,mistletoe,whistle,thistle,pestle,rustle,muscle,corpuscle,indictment,victualler,leicester,worcestershire|worcester,gloucester,bicester,greenwich,norwich,warwick,edinburgh,arkansas,illinois,connecticut",
+    "ptisan,ptosis,pneumatic,pneumonic,psittacosis,psyche,cnidarian,ctenophore,mnemonist,tmesis,gneiss,czardas,tzatziki,bdellium,phthisis,chthonic,ctenoid,mnemosyne,pschent,pteridophyte,ptyalin,yclept,wrybill,wrasse,gnathic,knout,kneidlach,knish,knesset,knaidel,wrymouth,vichyssoise,biscuit,circuit,guilt,guitar,guest,guide,guard,guess,rogue,vogue,league,tongue,plague,colleague,dialogue,catalogue,morgue,fatigue,intrigue,boutique,antique,unique,technique,physique,mosque,grotesque,picturesque,cheque,plaque,baroque,marquee,conquer,liquor,lacquer,racquet,silhouette,descent,ascent,scent,disciple,discipline,fascinate,miscellaneous,crescent,adolescent,luminescent,obsolescent,abscess,ascertain,fluorescent,irascible"
+  ]);
+
+  P("palindrome", "Name a word that's spelled the same backwards", "words", [
+    "mom|mum,dad,racecar,level,noon,wow",
+    "kayak,radar,madam,civic,refer,eye,pop,peep,deed,stats,anna,bob,hannah,otto,nun,did,tot,pup,gag,sis,mam,boob,toot",
+    "rotor,tenet,sagas,solos,redder,reviver,repaper,minim,shahs,stats,sexes,tenet,level,poop,peep,pip,eke,ewe,gig,huh,non,oho,pap,tit,ere,aha,ama,ana,ava,elle,eve,ada,ana,abba,asa,ava,emme,iti,ici,mim,naan,noon,nan,pop,sees,teet,rever,radar",
+    "rotator,deified,kinnikinnik,malayalam,redivider,detartrated,tattarrattat,aibohphobia,rotavator,releveler,civic,kayak,reifier,sememes,degged,murdrum,succus,terret,senes,marram,mesem,peeweep,hallah,halalah,ressasser,saippuakivikauppias,ogopogo,seles,sooloos,neven,stets,repaper,reviver,rotor,sagas,shahs,solos,stats,tenet",
+    "able was i ere i saw elba,a man a plan a canal panama,never odd or even,taco cat|tacocat,was it a car or a cat i saw,step on no pets,race fast safe car,yo banana boy,madam im adam|madam i'm adam,no lemon no melon,borrow or rob,we panic in a pew,dogma i am god,evil olive,live not on evil,nurses run,senile felines,top spot,stack cats,pull up,don't nod,rats live on no evil star,mr owl ate my metal worm,go hang a salami im a lasagna hog,sit on a potato pan otis,a santa at nasa"
+  ]);
+
+  P("namedish", "Name a food named after a person", "food", [
+    "caesar salad,beef wellington,eggs benedict,sandwich,margherita pizza|pizza margherita",
+    "pavlova,peach melba,nachos,beef stroganoff,earl grey|earl grey tea,granny smith|granny smith apple,carpaccio,battenberg|battenberg cake,garibaldi|garibaldi biscuit,madeleine,crepes suzette|crepe suzette,cobb salad,reuben|reuben sandwich,sachertorte|sacher torte,oysters rockefeller,salisbury steak,graham cracker,bechamel|bechamel sauce,chicken tetrazzini|tetrazzini",
+    "bananas foster,chateaubriand,nesselrode,bismarck|bismarck herring,lobster newberg,eggs sardou,peche melba,pizza margherita,bloody mary,tom collins,shirley temple,arnold palmer,rob roy,bellini,negroni,baby ruth,mcdonald's,wendy's,ben and jerry's,heinz,cadbury,hershey,mars,nestle,kraft,birds eye,hellmann's,chef boyardee,colonel sanders,sara lee,mrs fields,famous amos,orville redenbacher,little debbie,duncan hines,marie biscuit|marie,charlotte|charlotte russe,savarin,brillat-savarin,mornay|mornay sauce,soubise,praline,frangipane,tarte tatin|tatin,kaiser roll,pommes anna,veal orloff,beef carpaccio",
+    "lady baltimore cake,lord baltimore cake,lane cake,oysters bienville,oysters kirkpatrick,chicken a la king,shrimp de jonghe,veal prince orloff,tournedos rossini,cannelloni rossini,eggs rossini,pear belle helene|poire belle helene,crepe suzette,apple charlotte,charlotte royale,gateau saint honore|saint honore,sandwich,pozharsky cutlet|pozharsky,olivier salad|salad olivier,guriev porridge|guryev kasha,beef stroganoff,dobos torte,esterhazy torte,rigo jancsi,gundel pancake,pischinger torte,kaiserschmarrn,mozartkugel,fettuccine alfredo|alfredo,pasta alla norma,caesar dressing,crab louie,steak diane,fettuccine alfredo,beef stroganov",
+    "sauce choron,sauce foyot,sauce colbert,sauce robert,sauce mornay,sauce soubise,potage parmentier|parmentier,hachis parmentier,omelette arnold bennett|arnold bennett,eggs drumkilbo,lobster newburg,veal oscar,poulet marengo,consomme celestine,tournedos henri iv,eggs mornay,sole colbert,mazarin,mazarine,richelieu,conde,bechamel,peach melba,melba toast,lamington,pavlova,granny smith,graham bread,sylvester graham,kellogg's corn flakes,post toasties,clark bar,oh henry,mr goodbar,o'henry,reese's,tootsie roll,toblerone|toblerone,lindt,sprungli,suchard,cailler,nestle,peter,kohler,van houten,fry's,rowntree's,terry's,cadbury"
+  ]);
+
+  P("femaleleader", "Name a country that has had a female president or prime minister", "place", [
+    "united kingdom|uk|britain,germany,india,new zealand,israel",
+    "pakistan,australia,canada,sri lanka,bangladesh,philippines,argentina,brazil,chile,finland,norway,denmark,ireland,italy,iceland",
+    "liberia,indonesia,south korea,taiwan,thailand,turkey,poland,france,croatia,lithuania,latvia,estonia,slovakia,slovenia,switzerland,austria,belgium,greece,malta,mauritius,ethiopia,tanzania,malawi,mexico,peru,costa rica,panama,nicaragua,ecuador,trinidad and tobago,jamaica,barbados,dominica,haiti,guyana,mongolia,kyrgyzstan,georgia,moldova,romania,serbia,bosnia and herzegovina,north macedonia,kosovo,ukraine,sweden,portugal,hungary,bulgaria,singapore,nepal,myanmar|burma,honduras,bolivia,senegal,mozambique,rwanda,central african republic,burundi,sao tome and principe,gabon,mali,namibia,togo,tunisia,uganda,niger,samoa,new zealand",
+    "ceylon,iceland,yugoslavia,tuva",
+    ""
+  ]);
+
+  P("nonlatin", "Name a language that isn't written in the Latin alphabet", "words", [
+    "russian,arabic,chinese|mandarin,japanese,greek,hebrew,korean",
+    "hindi,thai,ukrainian,persian|farsi,urdu,bengali,punjabi,tamil,bulgarian,serbian,armenian,georgian,cantonese,yiddish,sanskrit,amharic,tibetan,mongolian,khmer,lao,burmese,nepali,marathi,gujarati,telugu,kannada,malayalam,sinhala,belarusian,macedonian,pashto",
+    "egyptian hieroglyphs|ancient egyptian,cuneiform|sumerian|akkadian,linear b|mycenaean greek,old norse runes|runic,gothic,coptic,syriac,aramaic,ge'ez,tigrinya,inuktitut,cherokee,cree,dhivehi,odia|oriya,assamese,dzongkha,uyghur,sindhi,kashmiri,tajik,kyrgyz,tatar,bashkir,chechen,ossetian,avar,mari,komi,yakut|sakha,chuvash,buryat,kalmyk,shan,karen,mon,tai lue,balinese,sundanese,buginese,batak,manchu,yi,naxi|dongba,vai,n'ko,tifinagh|berber,ancient greek,classical chinese,pali,prakrit,old church slavonic,glagolitic",
+    "linear a,meroitic,ugaritic,phoenician,old persian,elamite,hittite,luwian,carian,lycian,lydian,ogham|old irish,old turkic|orkhon,sogdian,khotanese,tangut,khitan,jurchen,mayan|maya hieroglyphs,rongorongo,indus script,proto-elamite,cypriot syllabary,south arabian,ancient north arabian,nabataean,palmyrene,mandaic,samaritan,avestan,pahlavi,manichaean,bactrian,brahmi,kharosthi,gupta,siddham,grantha,tirhuta,modi,sharada,takri,dogri,lepcha,limbu,meitei mayek,ahom,cham,tai tham,lanna,kawi,baybayin|tagalog,hanunoo,buhid,tagbanwa,kulitan,surat batak,lontara,rejang,ol chiki|santali,warang citi,sora sompeng,pau cin hau,mende kikakui,bassa vah,bamum,adlam|fula,osmanya|somali,garay,tifinagh,ditema,mwangwego,cherokee syllabary,cree syllabics,ojibwe syllabics,deseret,shavian,tengwar,klingon pIqaD|klingon,elvish|sindarin,aurebesh,braille"
   ]);
 
   root.LF_PROMPTS = out;

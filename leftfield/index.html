@@ -94,6 +94,10 @@
   .btn:disabled, input:disabled { opacity: .6; cursor: progress; }
 
   .count { font: 800 88px/1 var(--display); text-align: center; }
+  .kbox { display: flex; flex-direction: column; gap: 4px; border: 1px solid rgba(255, 79, 216, .35); background: rgba(255, 79, 216, .08); border-radius: 14px; padding: 11px 14px 12px; }
+  .kans { font: 800 21px/1.2 var(--display); text-transform: capitalize; overflow-wrap: anywhere; }
+  .kabout { margin: 0; font-size: 15px; color: var(--ink); }
+  .kabout:empty { display: none; }
   .call { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .call strong { font: 800 clamp(28px, 8vw, 40px)/1 var(--display); letter-spacing: .01em; }
   .call em { font: 700 22px/1 var(--mono); font-style: normal; }
@@ -203,6 +207,41 @@
   var judgeOK = true;
   var samplerP = (window.claude && typeof window.claude.use === "function") ? Promise.resolve(window.claude.use("sample")).catch(function () { return null; }) : Promise.resolve(null);
   samplerP.then(function (s) { if (!s) judgeOK = false; });
+  /* The One in a Krillion for a prompt: a real answer almost nobody thinks of, with one sentence on what it is.
+     Asked once per prompt and kept for a day. Without Claude, it falls back to the rarest answer on the list. */
+  var sampleOK = false;
+  function legendaryPick(p) {
+    var top = p.compiled.answers.filter(function (a) { return a.tier === 4; });
+    if (!top.length) top = p.compiled.answers.filter(function (a) { return a.tier === 3; });
+    return top.length ? top[Math.floor(Math.random() * top.length)] : null;
+  }
+  function krillionFor(p) {
+    if (p._k) return p._k;
+    var mine = samplerP.then(function (s) {
+      if (!s || !judgeOK) return null;
+      var q = "Trivia prompt: \"" + p.text + "\"\n" +
+        "Give ONE answer that is completely correct and real, but so obscure that almost nobody playing would ever think of it. " +
+        "Nothing well known. Double-check it really fits the prompt.\n" +
+        "Reply with only JSON: {\"answer\": \"the answer, as it is usually written\", \"about\": \"one plain sentence, at most 25 words, saying what it is\"}";
+      return s.json(q, { cache: { gcTime: 86400000 } }).then(function (v) {
+        if (!v || !v.answer) return null;
+        sampleOK = true;
+        return { answer: String(v.answer).trim().slice(0, 70), about: String(v.about || "").trim().slice(0, 220) };
+      }).catch(function (e) {
+        var code = e && e.code;
+        if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0) judgeOK = false;
+        return null;
+      });
+    }).then(function (v) {
+      if (v) return v;
+      p._k = null; /* try Claude again next time */
+      var a = legendaryPick(p);
+      return a ? { answer: a.name, about: "", fallback: true } : null;
+    });
+    p._k = mine;
+    return mine;
+  }
+
   function judge(p, typed) {
     return samplerP.then(function (s) {
       if (!s || !judgeOK) return null;
@@ -211,7 +250,7 @@
         "Is this a real, genuine answer that fits the prompt? Be fair and fairly generous at the edges of the category, and accept misspellings of real things. " +
         "Say no to gibberish, made-up things, and things that clearly don't fit.\n" +
         "Reply with only JSON: {\"valid\": true or false, \"answer\": \"the proper name of what they meant\", \"reason\": \"at most 12 words, to the player\"}";
-      return s.json(q, { modelTier: "quick", cache: { gcTime: 86400000 } }).catch(function (e) {
+      return s.json(q, { modelTier: "quick", cache: { gcTime: 86400000 } }).then(function (v) { sampleOK = true; return v; }).catch(function (e) {
         var code = e && e.code;
         if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0) { judgeOK = false; return null; }
         return { error: true };
@@ -619,6 +658,7 @@
 
   function atBat() {
     var p = game.prompts[game.i]; drawPips(); onEnter = null;
+    if (sampleOK) krillionFor(p);
     thrustTarget = idle = alt > 0.05 ? 0.3 : 0.25;
     var fill = h("i"), secs = h("div", { class: "secs", text: String(SECONDS) });
     var input = h("input", { type: "text", id: "answer", autocomplete: "off", autocapitalize: "off", autocorrect: "off", spellcheck: "false", placeholder: "Type an answer", "aria-label": p.text, enterkeyhint: "go" });
@@ -707,7 +747,15 @@
         h("p", { class: "muted", text: r.typed ? "Out of fuel before “" + r.typed + "” was fired." : "Out of fuel with nothing fired." })
       ];
     }
-    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [b]));
+    var kAns = h("div", { class: "kans t5", text: "Searching the far edge of the list…" }), kAbout = h("p", { class: "kabout" });
+    var kBox = h("div", { class: "kbox" }, [h("div", { class: "label", text: r.tier === KRILLION ? "Another One in a Krillion" : "The One in a Krillion" }), kAns, kAbout]);
+    krillionFor(r.prompt).then(function (k) {
+      if (!k) { kBox.hidden = true; return; }
+      kAns.textContent = k.answer;
+      kAbout.textContent = k.fallback ? "The rarest answer on my list." : k.about;
+      if (r.answer && M.key(k.answer) === M.key(r.answer.name)) kAbout.textContent = "That's the one you said. " + kAbout.textContent;
+    });
+    show([h("div", { class: "label", text: r.prompt.text })].concat(top, [kBox, b]));
     b.focus();
   }
 
