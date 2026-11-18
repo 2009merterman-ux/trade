@@ -344,12 +344,228 @@ function Show-Tips {
     ) | ForEach-Object { Write-Host "  $_" }
 }
 
+# ---------- 9. background checkup (find hidden stuff using your PC) ----------
+
+# Known background stuff that usually isn't needed all the time. Pattern -> plain-English note.
+$KnownBloat = [ordered]@{
+    'OneDrive'                                   = 'OneDrive cloud sync. Fine if you use it, otherwise wasted RAM/disk.'
+    'Teams|ms-teams'                             = 'Microsoft Teams. Starts with Windows even if you never use it.'
+    'Spotify'                                    = 'Spotify auto-start. You can just open it when you want music.'
+    'Discord'                                    = 'Discord auto-start. Open it when you need it.'
+    'EpicGamesLauncher|EpicWebHelper'            = 'Epic Games launcher. Games still work if you open Epic yourself.'
+    'Overwolf'                                   = 'Overwolf overlay. Heavy, and often installed by accident with game addons.'
+    'CCleaner'                                   = 'CCleaner background monitor. Not needed.'
+    'GoogleUpdate|GoogleUpdater'                 = 'Google updater. Chrome updates itself when you open it anyway.'
+    'MicrosoftEdgeUpdate'                        = 'Edge updater. Edge updates itself when you open it.'
+    'Adobe(ARM|GCInvoker|Updater|Update)|AGSService|AdobeCollabSync|CCXProcess' = 'Adobe background updaters/helpers. Not needed until you open Adobe apps.'
+    'Opera.*(Assistant|Autoupdate)|opera_autoupdate' = 'Opera browser background helper.'
+    'BraveUpdate'                                = 'Brave updater.'
+    'uTorrent|BitTorrent'                        = 'Torrent client. Uploads in the background and uses network/disk - close it when not downloading.'
+    'Skype'                                      = 'Skype auto-start.'
+    'Dropbox'                                    = 'Dropbox sync. Fine if you use it.'
+    'iTunesHelper|AppleMobileDevice'             = 'Apple/iTunes helper. Only needed when plugging in an iPhone.'
+    'jusched|JavaUpdate'                         = 'Java updater. Not needed.'
+    'Battle\.net'                                = 'Battle.net launcher auto-start.'
+    'EADesktop|EABackgroundService|Origin'       = 'EA app launcher/background service.'
+    'UbisoftConnect|upc\.exe|UplayWebCore'       = 'Ubisoft Connect launcher.'
+    'Wallpaper(Engine|32|64)'                    = 'Wallpaper Engine. Animated wallpapers use GPU (and fan noise).'
+    'McAfee|Norton|Avast|\bAVG\b|Avira|TotalAV'      = 'Third-party antivirus. Often very heavy; Windows Defender is built in and enough for most people. (Uninstall from Settings if you want - not done here.)'
+    'Razer|Synapse|iCUE|Corsair|LGHUB|LogiOptions|SteelSeries|ArmouryCrate' = 'Mouse/keyboard/RGB software. Only stop it if you do not need RGB or macros.'
+}
+
+# Never offer to touch these - games, anti-cheat, drivers, audio and security need them.
+$ProtectedPattern = 'nvidia|nvcontainer|\bamd|radeon|realtek|intel|easyanticheat|battleye|vanguard|vgc|vgk|faceit|defender|securityhealth|msmpeng|audio|wacom|steam client service|QuietPC'
+
+function Get-ExePath([string]$cmd) {
+    if (-not $cmd) { return $null }
+    $cmd = [Environment]::ExpandEnvironmentVariables($cmd.Trim())
+    if ($cmd -match '^"([^"]+)"') { return $Matches[1] }
+    if ($cmd -match '^(.+?\.(exe|com|bat|cmd|lnk))\b') { return $Matches[1] }
+    return ($cmd -split ' ')[0]
+}
+
+function Get-Company([string]$cmd) {
+    $path = Get-ExePath $cmd
+    try { if ($path -and (Test-Path -LiteralPath $path)) { return (Get-Item -LiteralPath $path).VersionInfo.CompanyName } } catch { }
+    return ''
+}
+
+function Get-BloatNote([string]$text) {
+    foreach ($k in $KnownBloat.Keys) { if ($text -match $k) { return $KnownBloat[$k] } }
+    return $null
+}
+
+function Ensure-StateProp($state, $name, $default) {
+    if (-not ($state.PSObject.Properties.Name -contains $name)) {
+        $state | Add-Member -NotePropertyName $name -NotePropertyValue $default
+    }
+}
+
+function Write-Item($name, $detail, $note) {
+    if ($note) { Write-Host ("  [!] {0}" -f $name) -ForegroundColor Yellow }
+    else       { Write-Host ("  [?] {0}" -f $name) -ForegroundColor White }
+    if ($detail) { Write-Host ("      {0}" -f $detail) -ForegroundColor DarkGray }
+    if ($note)   { Write-Host ("      -> {0}" -f $note) -ForegroundColor Yellow }
+}
+
+function Run-Checkup {
+    $report = Join-Path ([Environment]::GetFolderPath('Desktop')) 'QuietPC-report.txt'
+    try { Start-Transcript -Path $report -Force | Out-Null } catch { $report = $null }
+
+    Write-Title 'Background checkup - what runs without you asking'
+    Write-Host '  [!] = known stuff that usually is not needed all the time'
+    Write-Host '  [?] = not from Microsoft; probably fine, but check you know what it is'
+    Write-Host '  Nothing is changed during the scan.'
+
+    # Startup apps
+    Write-Host "`n  --- Starts with Windows ---" -ForegroundColor Cyan
+    $startup = @(Get-StartupItems | Where-Object { $_.Enabled })
+    if ($startup.Count -eq 0) { Write-Host '  (nothing)' }
+    foreach ($i in $startup) { Write-Item $i.Name ("{0}  [{1}]" -f $i.Command, (Get-Company $i.Command)) (Get-BloatNote "$($i.Name) $($i.Command)") }
+
+    # Scheduled tasks
+    Write-Host "`n  --- Scheduled tasks (run on a timer in the background) ---" -ForegroundColor Cyan
+    $tasks = @()
+    foreach ($t in Get-ScheduledTask -ErrorAction SilentlyContinue) {
+        if ($t.State -eq 'Disabled' -or $t.TaskPath -like '\Microsoft\*' -or $t.TaskName -like 'QuietPC*') { continue }
+        $exe = ''
+        if ($t.Actions -and $t.Actions[0].PSObject.Properties.Name -contains 'Execute') { $exe = [string]$t.Actions[0].Execute }
+        $note = Get-BloatNote "$($t.TaskName) $exe"
+        $tasks += [pscustomobject]@{ Task = $t; Exe = $exe; Note = $note }
+        Write-Item ($t.TaskPath + $t.TaskName) ("{0}  [{1}]" -f $exe, (Get-Company $exe)) $note
+    }
+    if ($tasks.Count -eq 0) { Write-Host '  (nothing extra)' }
+
+    # Services
+    Write-Host "`n  --- Background services set to start automatically (not Microsoft) ---" -ForegroundColor Cyan
+    $services = @()
+    foreach ($s in Get-CimInstance Win32_Service -Filter "StartMode='Auto'" -ErrorAction SilentlyContinue) {
+        $company = Get-Company $s.PathName
+        if ($company -match 'Microsoft' -or $s.PathName -match '\\svchost\.exe') { continue }
+        $note = Get-BloatNote "$($s.Name) $($s.DisplayName) $($s.PathName)"
+        $services += [pscustomobject]@{ Service = $s; Note = $note; Company = $company }
+        Write-Item ("{0} ({1}) - {2}" -f $s.DisplayName, $s.Name, $s.State) ("{0}  [{1}]" -f $s.PathName, $company) $note
+    }
+    if ($services.Count -eq 0) { Write-Host '  (nothing extra)' }
+
+    # Running background processes using a lot of RAM
+    Write-Host "`n  --- Background programs using the most memory right now ---" -ForegroundColor Cyan
+    Get-Process | Where-Object { $_.MainWindowHandle -eq 0 -and $_.WorkingSet64 -gt 100MB } |
+        Sort-Object WorkingSet64 -Descending | Select-Object -First 12 | ForEach-Object {
+            $company = ''
+            try { $company = $_.Company } catch { }
+            $note = Get-BloatNote "$($_.ProcessName) $($_.Path)"
+            Write-Item ("{0}  {1}" -f $_.ProcessName, (Format-Size $_.WorkingSet64)) $company $note
+        }
+
+    # Xbox Game Bar background recording - records your games all the time, costs GPU = noise
+    Write-Host "`n  --- Windows settings ---" -ForegroundColor Cyan
+    $dvrKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR'
+    $dvrOn = $false
+    try { $dvrOn = ((Get-ItemProperty -Path $dvrKey -Name AppCaptureEnabled -ErrorAction Stop).AppCaptureEnabled -eq 1) } catch { }
+    if ($dvrOn) { Write-Item 'Xbox Game Bar background recording is ON' '' 'Quietly records gameplay all the time. Costs GPU power (more heat/noise) and FPS.' }
+    else        { Write-Host '  Xbox background recording: off (good)' }
+
+    if ($report) {
+        try { Stop-Transcript | Out-Null } catch { }
+        Write-Host "`n  Report saved to your Desktop: QuietPC-report.txt" -ForegroundColor Green
+        Write-Host '  Send it to Claude and it will tell you what each [?] item is.' -ForegroundColor Green
+    }
+
+    # ---- offer fixes, one at a time ----
+    $flaggedTasks = @($tasks | Where-Object { $_.Note -and ("$($_.Task.TaskName) $($_.Exe)" -notmatch $ProtectedPattern) })
+    $flaggedSvcs  = @($services | Where-Object { $_.Note -and ("$($_.Service.Name) $($_.Service.DisplayName) $($_.Service.PathName)" -notmatch $ProtectedPattern) -and ($_.Note -notmatch 'antivirus') })
+    $flaggedStart = @($startup | Where-Object { Get-BloatNote "$($_.Name) $($_.Command)" })
+    if (($flaggedTasks.Count + $flaggedSvcs.Count + $flaggedStart.Count) -eq 0 -and -not $dvrOn) {
+        Write-Host "`n  Nothing obvious to switch off. Your PC is pretty clean." -ForegroundColor Green
+        return
+    }
+    Write-Host ''
+    if (-not (Ask-YesNo 'Want to go through the [!] items and choose what to switch off? (all reversible with option 8)')) { return }
+
+    $state = Load-State
+    Ensure-StateProp $state 'DisabledStartup' @()
+    Ensure-StateProp $state 'DisabledTasks' @()
+    Ensure-StateProp $state 'ChangedServices' @()
+    Ensure-StateProp $state 'GameDvrWasOn' $false
+    $dTasks = @($state.DisabledTasks | Where-Object { $_ })
+    $dSvcs  = @($state.ChangedServices | Where-Object { $_ })
+    $dStart = @($state.DisabledStartup | Where-Object { $_ })
+
+    foreach ($i in $flaggedStart) {
+        Write-Host "`n  Startup app: $($i.Name)" -ForegroundColor White
+        Write-Host "  $(Get-BloatNote "$($i.Name) $($i.Command)")" -ForegroundColor DarkGray
+        if (Ask-YesNo '  Stop it starting with Windows?') {
+            try { Set-StartupApproved $i $DisabledBytes; $dStart += [pscustomobject]@{ Approved = $i.Approved; Key = $i.Key; Name = $i.Name }; Write-Host '  Done.' -ForegroundColor Green }
+            catch { Write-Host '  Could not change it (needs admin). Skipped.' -ForegroundColor Yellow }
+        }
+    }
+    foreach ($t in $flaggedTasks) {
+        Write-Host "`n  Scheduled task: $($t.Task.TaskName)" -ForegroundColor White
+        Write-Host "  $($t.Note)" -ForegroundColor DarkGray
+        if (Ask-YesNo '  Switch this task off?') {
+            try {
+                Disable-ScheduledTask -TaskPath $t.Task.TaskPath -TaskName $t.Task.TaskName | Out-Null
+                $dTasks += [pscustomobject]@{ TaskPath = $t.Task.TaskPath; TaskName = $t.Task.TaskName }
+                Write-Host '  Done.' -ForegroundColor Green
+            } catch { Write-Host '  Could not change it (needs admin). Skipped.' -ForegroundColor Yellow }
+        }
+    }
+    foreach ($s in $flaggedSvcs) {
+        Write-Host "`n  Service: $($s.Service.DisplayName)" -ForegroundColor White
+        Write-Host "  $($s.Note)" -ForegroundColor DarkGray
+        Write-Host '  (Switching to "Manual" means it only starts when the app actually needs it.)' -ForegroundColor DarkGray
+        if (Ask-YesNo '  Set this service to Manual?') {
+            try {
+                Set-Service -Name $s.Service.Name -StartupType Manual
+                $dSvcs += [pscustomobject]@{ Name = $s.Service.Name; Display = $s.Service.DisplayName }
+                Write-Host '  Done (takes effect after restart).' -ForegroundColor Green
+            } catch { Write-Host '  Could not change it (needs admin or it is protected). Skipped.' -ForegroundColor Yellow }
+        }
+    }
+    if ($dvrOn) {
+        Write-Host "`n  Xbox Game Bar background recording" -ForegroundColor White
+        Write-Host '  You can still record clips by hand with Win+Alt+R.' -ForegroundColor DarkGray
+        if (Ask-YesNo '  Turn background recording off?') {
+            Set-ItemProperty -Path $dvrKey -Name AppCaptureEnabled -Value 0 -Type DWord
+            $state.GameDvrWasOn = $true
+            Write-Host '  Done.' -ForegroundColor Green
+        }
+    }
+    $state.DisabledStartup = $dStart
+    $state.DisabledTasks = $dTasks
+    $state.ChangedServices = $dSvcs
+    Save-State $state
+    Write-Host "`n  All set. Restart the PC to feel the difference." -ForegroundColor Green
+}
+
+function Restore-Checkup {
+    $state = Load-State
+    foreach ($t in @($state.DisabledTasks | Where-Object { $_ })) {
+        try { Enable-ScheduledTask -TaskPath $t.TaskPath -TaskName $t.TaskName | Out-Null; Write-Host "  Re-enabled task: $($t.TaskName)" -ForegroundColor Green }
+        catch { Write-Host "  Could not re-enable task: $($t.TaskName)" -ForegroundColor Yellow }
+    }
+    foreach ($s in @($state.ChangedServices | Where-Object { $_ })) {
+        try { Set-Service -Name $s.Name -StartupType Automatic; Write-Host "  Service back to Automatic: $($s.Display)" -ForegroundColor Green }
+        catch { Write-Host "  Could not restore service: $($s.Display)" -ForegroundColor Yellow }
+    }
+    if ($state.PSObject.Properties.Name -contains 'GameDvrWasOn' -and $state.GameDvrWasOn) {
+        try { Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name AppCaptureEnabled -Value 1 -Type DWord; Write-Host '  Xbox background recording back on.' -ForegroundColor Green } catch { }
+    }
+    Ensure-StateProp $state 'DisabledTasks' @()
+    Ensure-StateProp $state 'ChangedServices' @()
+    Ensure-StateProp $state 'GameDvrWasOn' $false
+    $state.DisabledTasks = @(); $state.ChangedServices = @(); $state.GameDvrWasOn = $false
+    Save-State $state
+}
+
 function Undo-Everything {
     Write-Title 'Undo everything QuietPC changed'
     if (-not (Ask-YesNo '  Put everything back the way it was?')) { return }
     Enable-DayMode -Quiet
     Remove-Schedule
     Restore-Startup
+    Restore-Checkup
     if (Test-PlanExists $QuietPlanGuid) { powercfg /delete $QuietPlanGuid | Out-Null; Write-Host '  Quiet Night plan removed.' -ForegroundColor Green }
     Write-Host '  All done - your PC is back to how it was.' -ForegroundColor Green
 }
@@ -372,6 +588,7 @@ while ($true) {
     Write-Host '  6) What is making noise  (shows CPU hogs, disk space, RAM)'
     Write-Host '  7) Extra quiet tips'
     Write-Host '  8) Undo everything'
+    Write-Host '  9) Background checkup    (finds hidden stuff using your PC, makes a report)'
     Write-Host '  0) Exit'
     $choice = (Read-Host "`nPick a number").Trim()
     try {
@@ -388,6 +605,7 @@ while ($true) {
             '6' { Show-Status; Pause-Menu }
             '7' { Show-Tips; Pause-Menu }
             '8' { Undo-Everything; Pause-Menu }
+            '9' { Run-Checkup; Pause-Menu }
             '0' { break }
             default { Write-Host '  Pick a number from the list.' -ForegroundColor Yellow }
         }

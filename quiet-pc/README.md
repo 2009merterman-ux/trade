@@ -18,6 +18,7 @@ A small Windows tool that makes your PC quieter at night and quicker to open app
 | 6 | What's making noise | Shows which programs are using the most CPU, plus disk space and RAM. |
 | 7 | Tips | Fixes that need your hands: dust, FPS cap, fan curves, SSD. |
 | 8 | Undo everything | Puts everything back the way it was. |
+| 9 | Background checkup | Lists everything that runs without you asking: startup apps, scheduled tasks, background services, and hidden programs using lots of memory. It marks known junk with [!], saves a report to your Desktop (`QuietPC-report.txt`), and then asks about each [!] item. It never touches drivers, anti-cheat, audio or antivirus. |
 
 ## Safety promises
 
